@@ -88,6 +88,20 @@ func _unhandled_input(ev: InputEvent) -> void:
 		alternar_musica()
 
 
+## true se há um controle conectado
+func tem_controle() -> bool:
+	return Input.get_connected_joypads().size() > 0
+
+
+## texto de dica: mostra o botão do controle (Xbox ou PlayStation) se houver um conectado, senão a tecla
+func dica(tecla: String, botao_xbox: String, botao_ps: String) -> String:
+	if not tem_controle():
+		return tecla
+	var nome := Input.get_joy_name(Input.get_connected_joypads()[0]).to_lower()
+	var ps := nome.contains("ps") or nome.contains("playstation") or nome.contains("sony") or nome.contains("dualsense") or nome.contains("dualshock")
+	return botao_ps if ps else botao_xbox
+
+
 func liberada(i: int) -> bool:
 	return i == 0 or int(estrelas[i - 1]) > 0
 
@@ -164,7 +178,7 @@ func layout(id: String) -> Array:
 	match id:
 		"curitiba":
 			return [
-				["placa", 60, "← → ou A D: andar\nEspaço: pular (segure para pular mais alto)\nShift: correr", 470],
+				["placa", 60, dica("← → ou A D: andar\nEspaço: pular (segure para pular mais alto)\nShift: correr", "Analógico ou direcional: andar\nA: pular (segure para pular mais alto)\nX ou RB: correr", "Analógico ou direcional: andar\nCruz: pular (segure para pular mais alto)\nQuadrado ou R1: correr"), 470],
 				["placa", 760, "Pegue as moedas \"A\"!\nBata nos blocos ? por baixo!", 330],
 				["moedas", 750, 6, 0], ["moeda_arco", 1300, 8, 210], ["bloco", 1150],
 				["inimigo", "preguica", 1750, 1550, 2000],

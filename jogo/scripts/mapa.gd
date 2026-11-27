@@ -149,7 +149,7 @@ func _ready() -> void:
 		cartoes.append(painel)
 
 	info = _rot(ui, "", 34, Vector2(0, 890), Color.WHITE)
-	_rot(ui, "← →  escolher     Espaço  jogar     Esc  voltar", 30, Vector2(0, 1000), Color(1, 1, 1, 0.85))
+	_rot(ui, Jogo.dica("← →  escolher     Enter  jogar     Esc  voltar", "Direcional  escolher     A  jogar     B  voltar", "Direcional  escolher     Cruz  jogar     Bolinha  voltar"), 30, Vector2(0, 1000), Color(1, 1, 1, 0.85))
 	if Jogo.terminou_tudo():
 		_rot(ui, "P  ver meu prêmio", 36, Vector2(0, 945), OURO)
 	_atualizar()
@@ -211,8 +211,8 @@ func _unhandled_input(ev: InputEvent) -> void:
 		Jogo.cidade_atual = sel
 		Jogo.sfx("clique")
 		get_tree().change_scene_to_file("res://fase.tscn")
+	elif ev.is_action_pressed("voltar"):
+		get_tree().change_scene_to_file("res://main.tscn")
 	elif ev is InputEventKey and ev.pressed and not ev.echo:
-		if ev.physical_keycode == KEY_ESCAPE:
-			get_tree().change_scene_to_file("res://main.tscn")
-		elif ev.physical_keycode == KEY_P and Jogo.terminou_tudo():
+		if ev.physical_keycode == KEY_P and Jogo.terminou_tudo():
 			get_tree().change_scene_to_file("res://final.tscn")

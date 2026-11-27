@@ -6,11 +6,11 @@
 | Andar | ← → ou A D | analógico / direcional | setas à esquerda |
 | Correr | Shift (segurar) | X | correr automático ao segurar a seta |
 | Pular | Espaço, W ou ↑ | A | botão "Pular" à direita |
-| Responder pergunta | ↑ ↓ ← → (ou W A S D) escolhem e **Espaço/Enter** confirmam; ou tecla 1 a 4; ou clique | direcional + A | toque na alternativa |
-| Continuar / próxima fase | **Espaço** (Enter também) | A | toque |
+| Responder pergunta | ↑ ↓ ← → (ou W A S D) escolhem e **Enter** confirma; ou tecla 1 a 4; ou clique | direcional + A | toque na alternativa |
+| Continuar / próxima fase | **Enter** | A | toque |
 | Pausar | Esc / P | Start | botão ‖ no canto |
 
-Nomes das ações no Godot (Input Map): `mover_esquerda`, `mover_direita`, `correr`, `pular`, `pausar`, `confirmar` (Espaço, Enter).
+Nomes das ações no Godot (Input Map): `mover_esquerda`, `mover_direita`, `correr`, `pular`, `pausar`, `confirmar` (Enter, A do controle), `voltar` (Esc, B), `mapa` (M, Y), `reiniciar` (R, X), `nav_anterior`/`nav_proximo` (setas, direcional e analógico).
 
 ## 3.2 Movimento do personagem
 Valores iniciais. São ajustados nos testes e ficam em variáveis exportadas do script do jogador.

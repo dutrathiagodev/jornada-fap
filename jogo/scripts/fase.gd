@@ -644,7 +644,7 @@ func _criar_tela_pergunta() -> void:
 	fill_tempo = _estilo(VERDE, 11)
 	barra.add_theme_stylebox_override("fill", fill_tempo)
 	v.add_child(barra)
-	var dica_perg := _rotulo("↑ ↓ escolher     Espaço confirmar     (ou tecla 1 a 4)", 24, Color(1, 1, 1, 0.7), false)
+	var dica_perg := _rotulo(Jogo.dica("↑ ↓ escolher     Enter confirmar     (ou tecla 1 a 4)", "Direcional: escolher     A: confirmar", "Direcional: escolher     Cruz: confirmar"), 24, Color(1, 1, 1, 0.7), false)
 	dica_perg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(dica_perg)
 	lbl_feed = _rotulo("", 32, Color.WHITE, false)
@@ -682,7 +682,7 @@ func _criar_tela_fim() -> void:
 	fim_dica.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	fim_dica.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(fim_dica)
-	var dica := _rotulo("Espaço: continuar     M: mapa", 30, OURO, false)
+	var dica := _rotulo(Jogo.dica("Enter: continuar     M: mapa", "A: continuar     Y: mapa", "Cruz: continuar     Triângulo: mapa"), 30, OURO, false)
 	dica.name = "dica_teclas"
 	dica.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(dica)
@@ -706,7 +706,7 @@ func _criar_tela_pausa() -> void:
 	ic.add_theme_font_size_override("font_size", 30)
 	ic.add_theme_color_override("font_color", CLARO)
 	v.add_child(ic)
-	for par in [["Espaço", "continuar"], ["R", "reiniciar a fase"], ["M", "voltar ao mapa"], ["N", "música liga/desliga"]]:
+	for par in [[Jogo.dica("Enter", "A", "Cruz"), "continuar"], [Jogo.dica("R", "X", "Quadrado"), "reiniciar a fase"], [Jogo.dica("M", "Y", "Triângulo"), "voltar ao mapa"], ["N", "música liga/desliga"]]:
 		var linha := HBoxContainer.new()
 		linha.add_theme_constant_override("separation", 24)
 		linha.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -1097,7 +1097,7 @@ func _fim_de_jogo() -> void:
 	fim_ctl.visible = false
 	fim_texto.text = "Você chegou até aqui com %d pontos. Quem tenta de novo aprende mais!" % pontos
 	fim_dica.text = ""
-	tela_fim.find_child("dica_teclas", true, false).text = "Espaço: tentar de novo     M: mapa"
+	tela_fim.find_child("dica_teclas", true, false).text = Jogo.dica("Enter: tentar de novo     M: mapa", "A: tentar de novo     Y: mapa", "Cruz: tentar de novo     Triângulo: mapa")
 	tela_fim.visible = true
 	tela_perg.visible = false
 	get_tree().paused = false
@@ -1121,7 +1121,7 @@ func _terminar() -> void:
 	fim_ctl.n = est
 	fim_texto.text = "%d de %d desafios certos   ·   %d de %d moedas\n%d corações   ·   %d pontos" % [acertos, n_obrig, moedas, moedas_total, vidas, pontos]
 	fim_dica.text = "Você sabia? " + str(cid["dica"])
-	tela_fim.find_child("dica_teclas", true, false).text = ("Espaço: próxima fase     M: mapa" if idx < 4 else "Espaço: ver meu prêmio     M: mapa")
+	tela_fim.find_child("dica_teclas", true, false).text = (Jogo.dica("Enter: próxima fase     M: mapa", "A: próxima fase     Y: mapa", "Cruz: próxima fase     Triângulo: mapa") if idx < 4 else Jogo.dica("Enter: ver meu prêmio     M: mapa", "A: ver meu prêmio     Y: mapa", "Cruz: ver meu prêmio     Triângulo: mapa"))
 	_atualizar_hud()
 	get_tree().create_timer(0.9).timeout.connect(func():
 		tela_fim.visible = true
@@ -1159,10 +1159,10 @@ func _unhandled_input(ev: InputEvent) -> void:
 	if estado == "pergunta" and tecla >= KEY_1 and tecla <= KEY_4:
 		_responder(tecla - KEY_1)
 		get_viewport().set_input_as_handled()
-	elif estado == "pergunta" and (tecla == KEY_UP or tecla == KEY_LEFT or tecla == KEY_W or tecla == KEY_A):
+	elif estado == "pergunta" and ev.is_action_pressed("nav_anterior"):
 		_selecionar(posmod(perg_sel - 1, perg_n))
 		get_viewport().set_input_as_handled()
-	elif estado == "pergunta" and (tecla == KEY_DOWN or tecla == KEY_RIGHT or tecla == KEY_S or tecla == KEY_D):
+	elif estado == "pergunta" and ev.is_action_pressed("nav_proximo"):
 		_selecionar(posmod(perg_sel + 1, perg_n))
 		get_viewport().set_input_as_handled()
 	elif estado == "pergunta" and ev.is_action_pressed("confirmar"):
@@ -1182,7 +1182,7 @@ func _unhandled_input(ev: InputEvent) -> void:
 					get_tree().change_scene_to_file("res://final.tscn")
 			else:
 				get_tree().reload_current_scene()
-		elif tecla == KEY_M or tecla == KEY_ESCAPE:
+		elif ev.is_action_pressed("mapa") or ev.is_action_pressed("voltar"):
 			_ir_mapa()
 	elif estado == "jogo" and ev.is_action_pressed("pausar"):
 		estado = "pausa"
@@ -1195,10 +1195,10 @@ func _unhandled_input(ev: InputEvent) -> void:
 			Jogo.abafar(false)
 			get_tree().paused = false
 			tela_pausa.visible = false
-		elif tecla == KEY_R:
+		elif ev.is_action_pressed("reiniciar"):
 			get_tree().paused = false
 			get_tree().reload_current_scene()
-		elif tecla == KEY_M:
+		elif ev.is_action_pressed("mapa"):
 			_ir_mapa()
 
 

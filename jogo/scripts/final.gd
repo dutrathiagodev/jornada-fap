@@ -166,7 +166,7 @@ func _ready() -> void:
 	lbl_aviso.size = Vector2(860, 80)
 	if faixa == 0:
 		_rot(ui, "Termine as 5 cidades para liberar o desconto", 44, 850, CLARO)
-	_rot(ui, "Esc  voltar ao mapa", 30, 985, Color(1, 1, 1, 0.85))
+	_rot(ui, Jogo.dica("Esc  voltar ao mapa", "B  voltar ao mapa", "Bolinha  voltar ao mapa"), 30, 985, Color(1, 1, 1, 0.85))
 	_mudou(campo.text)
 	campo.grab_focus()
 
@@ -212,5 +212,5 @@ func _mudou(texto: String) -> void:
 
 
 func _unhandled_input(ev: InputEvent) -> void:
-	if ev is InputEventKey and ev.pressed and not ev.echo and ev.physical_keycode == KEY_ESCAPE:
+	if ev.is_action_pressed("voltar"):
 		get_tree().change_scene_to_file("res://mapa.tscn")

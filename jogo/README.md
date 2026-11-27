@@ -3,7 +3,8 @@
 Abrir e jogar: `./jogar.sh` (na pasta do JOGO-FAP). Para editar, abra a pasta `jogo/` no Godot 4.7.2 (`ferramentas/godot/`).
 
 **Controles:** ← → ou A D andam · Espaço/W/↑ pula (segure para pular mais alto) · Shift corre · Esc pausa.
-**Perguntas:** ↑ ↓ ← → escolhem e Espaço confirma (ou teclas 1 a 4). **Espaço** também continua e avança de fase.
+**Perguntas:** ↑ ↓ ← → escolhem e **Enter** confirma (ou teclas 1 a 4). **Enter** também continua e avança de fase.
+**Controle (Xbox, PlayStation, Switch...):** analógico esquerdo ou direcional andam · A (Cruz) pula e confirma · X/RB/RT (Quadrado/R1/R2) corre · Start pausa · B (Bolinha) volta · Y (Triângulo) mapa. As dicas na tela trocam sozinhas para os botões do controle.
 
 **Fases prontas:** as 5 cidades (Curitiba, Foz do Iguaçu, São Paulo, Florianópolis, Porto Alegre), tela de título, mapa, resultado, pausa e tela do cupom. Perguntas em `dados/perguntas/<cidade>.json`.
 
