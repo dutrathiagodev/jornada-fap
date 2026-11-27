@@ -178,7 +178,7 @@ func layout(id: String) -> Array:
 	match id:
 		"curitiba":
 			return [
-				["placa", 60, dica("← → ou A D: andar\nEspaço: pular (segure para pular mais alto)\nShift: correr", "Analógico ou direcional: andar\nA: pular (segure para pular mais alto)\nX ou RB: correr", "Analógico ou direcional: andar\nCruz: pular (segure para pular mais alto)\nQuadrado ou R1: correr"), 470],
+				["placa", 60, ("Setas na tela: andar\nBotão grande: pular (segure para pular mais alto)\nBotão >>: correr" if ControlesToque.deve_aparecer() else dica("← → ou A D: andar\nEspaço: pular (segure para pular mais alto)\nShift: correr", "Analógico ou direcional: andar\nA: pular (segure para pular mais alto)\nX ou RB: correr", "Analógico ou direcional: andar\nCruz: pular (segure para pular mais alto)\nQuadrado ou R1: correr")), 470],
 				["placa", 760, "Pegue as moedas \"A\"!\nBata nos blocos ? por baixo!", 330],
 				["moedas", 750, 6, 0], ["moeda_arco", 1300, 8, 210], ["bloco", 1150],
 				["inimigo", "preguica", 1750, 1550, 2000],

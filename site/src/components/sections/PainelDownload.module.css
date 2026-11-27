@@ -1,0 +1,54 @@
+.painel {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  margin-top: 8px;
+}
+
+.principal {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+.instrucao {
+  max-width: 560px;
+  font-size: 0.95rem;
+  color: var(--suave);
+}
+
+.outras {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 26px;
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.outras a {
+  color: var(--creme);
+  text-decoration: none;
+  border-bottom: 1px solid #a88b5266;
+  padding-bottom: 2px;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
+}
+
+.outras a:hover {
+  color: var(--ouro);
+  border-color: var(--ouro);
+}
+
+.outras span {
+  margin-left: 6px;
+  font-weight: 500;
+  color: var(--suave);
+  letter-spacing: 0.05em;
+}

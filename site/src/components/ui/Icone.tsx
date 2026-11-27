@@ -7,7 +7,9 @@ type Nome =
   | "presente"
   | "livro"
   | "estrela"
-  | "ampliar";
+  | "ampliar"
+  | "baixar"
+  | "celular";
 
 const TRACOS: Record<Nome, React.ReactNode> = {
   play: <path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none" />,
@@ -28,6 +30,13 @@ const TRACOS: Record<Nome, React.ReactNode> = {
   ),
   livro: <path d="M5 4.5A1.5 1.5 0 016.5 3H19v15H6.5A1.5 1.5 0 005 19.5zM5 19.5A1.5 1.5 0 006.5 21H19v-3M9 7h6" />,
   estrela: <path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9l-5.2 2.8 1-5.9-4.3-4.1 5.9-.8z" />,
+  baixar: <path d="M12 4v11M7 11l5 5 5-5M5 20h14" />,
+  celular: (
+    <>
+      <rect x="7" y="2.5" width="10" height="19" rx="2" />
+      <path d="M11 18.5h2" />
+    </>
+  ),
   ampliar: <path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7" />,
 };
 

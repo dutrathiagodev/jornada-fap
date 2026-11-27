@@ -102,6 +102,7 @@ var fim_texto: Label
 var fim_dica: Label
 var tela_pausa: Control
 var flash: ColorRect
+var toque: ControlesToque       # botões na tela (só em aparelhos de toque)
 
 
 func _ready() -> void:
@@ -299,7 +300,7 @@ func _construir() -> void:
 				t.position = Vector2(e[1], chao_y - 8)
 				mundo.add_child(t)
 			"plat":
-				var p := Plat.new()
+				var p := PlataformaResposta.new()
 				p.w = e[3]
 				p.cor = Color("#8C5A3C")
 				p.position = Vector2(e[1], chao_y - e[2])
@@ -350,7 +351,7 @@ func _caminho() -> void:
 	var tres: Array = [alt_certa, outras[0], outras[1]]
 	tres.shuffle()
 	for i in 3:
-		var p := Plat.new()
+		var p := PlataformaResposta.new()
 		p.w = 240.0
 		p.texto = tres[i]
 		p.correta = (tres[i] == alt_certa)
@@ -466,7 +467,7 @@ func _criar_ui() -> void:
 	lbl_fase.add_theme_constant_override("outline_size", 8)
 	cartao.add_child(lbl_fase)
 
-	hud_prog = Progresso.new()
+	hud_prog = BarraProgresso.new()
 	hud_prog.position = Vector2(540, 20)
 	hud_prog.size = Vector2(840, 100)
 	hud_prog.fim_x = fim_x
@@ -502,6 +503,11 @@ func _criar_ui() -> void:
 	banner.add_child(banner_lbl)
 	ui.add_child(banner)
 
+	if ControlesToque.deve_aparecer():
+		toque = ControlesToque.new()
+		toque.pausar_pedido.connect(_pausar)
+		ui.add_child(toque)
+
 	_criar_tela_pergunta()
 	_criar_tela_fim()
 	_criar_tela_pausa()
@@ -510,10 +516,7 @@ func _criar_ui() -> void:
 		if n.get_parent() == ui:
 			ui.move_child(n, -1)
 	if OS.has_environment("FAP_PAUSA"):  # só para testes: abre a pausa sozinho
-		get_tree().create_timer(1.0).timeout.connect(func():
-			estado = "pausa"
-			get_tree().paused = true
-			tela_pausa.visible = true)
+		get_tree().create_timer(1.0).timeout.connect(_pausar)
 
 
 func _painel_arte() -> StyleBoxTexture:
@@ -650,7 +653,7 @@ func _criar_tela_pergunta() -> void:
 	lbl_feed = _rotulo("", 32, Color.WHITE, false)
 	lbl_feed.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(lbl_feed)
-	lbl_cont = _rotulo("Aperte ESPAÇO para continuar", 28, OURO, false)
+	lbl_cont = _rotulo(Jogo.dica("Aperte ENTER para continuar (ou toque na tela)", "Aperte A para continuar", "Aperte Cruz para continuar"), 28, OURO, false)
 	lbl_cont.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	v.add_child(lbl_cont)
 
@@ -1045,7 +1048,7 @@ func _ponte_caminho() -> void:
 
 
 func _pedaco_ponte(cx: float, larg: float) -> void:
-	var b := Plat.new()
+	var b := PlataformaResposta.new()
 	b.w = larg
 	b.h = 70
 	b.cor = Color("#8B5A2B")
@@ -1154,6 +1157,27 @@ func _selecionar(i: int) -> void:
 		b.add_theme_color_override("font_color", Color("#14213D") if k == i else Color.WHITE)
 
 
+## toque na tela do celular (o Godot o converte em clique do mouse) ou clique do mouse
+func _tocou_na_tela(ev: InputEvent) -> bool:
+	return ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT
+
+
+func _pausar() -> void:
+	if estado != "jogo":
+		return
+	estado = "pausa"
+	Jogo.abafar(true)
+	get_tree().paused = true
+	tela_pausa.visible = true
+
+
+func _retomar() -> void:
+	estado = "jogo"
+	Jogo.abafar(false)
+	get_tree().paused = false
+	tela_pausa.visible = false
+
+
 func _unhandled_input(ev: InputEvent) -> void:
 	var tecla: int = ev.physical_keycode if ev is InputEventKey and ev.pressed and not ev.echo else -1
 	if estado == "pergunta" and tecla >= KEY_1 and tecla <= KEY_4:
@@ -1168,11 +1192,11 @@ func _unhandled_input(ev: InputEvent) -> void:
 	elif estado == "pergunta" and ev.is_action_pressed("confirmar"):
 		_responder(perg_sel)
 		get_viewport().set_input_as_handled()
-	elif estado == "feedback" and ev.is_action_pressed("confirmar"):
+	elif estado == "feedback" and (ev.is_action_pressed("confirmar") or _tocou_na_tela(ev)):
 		_continuar()
 		get_viewport().set_input_as_handled()
 	elif estado == "fim" and tela_fim.visible:
-		if ev.is_action_pressed("confirmar"):
+		if ev.is_action_pressed("confirmar") or _tocou_na_tela(ev):
 			get_tree().paused = false
 			if venceu:
 				if idx < 4:
@@ -1185,16 +1209,10 @@ func _unhandled_input(ev: InputEvent) -> void:
 		elif ev.is_action_pressed("mapa") or ev.is_action_pressed("voltar"):
 			_ir_mapa()
 	elif estado == "jogo" and ev.is_action_pressed("pausar"):
-		estado = "pausa"
-		Jogo.abafar(true)
-		get_tree().paused = true
-		tela_pausa.visible = true
+		_pausar()
 	elif estado == "pausa":
-		if ev.is_action_pressed("pausar") or ev.is_action_pressed("confirmar"):
-			estado = "jogo"
-			Jogo.abafar(false)
-			get_tree().paused = false
-			tela_pausa.visible = false
+		if ev.is_action_pressed("pausar") or ev.is_action_pressed("confirmar") or _tocou_na_tela(ev):
+			_retomar()
 		elif ev.is_action_pressed("reiniciar"):
 			get_tree().paused = false
 			get_tree().reload_current_scene()
@@ -1243,6 +1261,8 @@ func _physics_process(delta: float) -> void:
 
 
 func _process(delta: float) -> void:
+	if toque:
+		toque.visible = estado == "jogo"
 	if estado == "pergunta":
 		tempo -= delta
 		barra.value = tempo
@@ -1301,524 +1321,3 @@ func _demo(delta: float) -> void:
 
 
 # ====================================================================== objetos
-class Moeda extends Area2D:
-	const GIRO := preload("res://assets/objetos/moeda_giro.png")
-	const N := 32
-	var t := randf() * 6.0
-
-	func _ready() -> void:
-		var f := CollisionShape2D.new()
-		var r := CircleShape2D.new()
-		r.radius = 34.0
-		f.shape = r
-		add_child(f)
-
-	func _process(d: float) -> void:
-		t += d
-		queue_redraw()
-
-	func _draw() -> void:
-		var q := int(t * 20.0) % N
-		var fw := GIRO.get_width() / float(N)
-		var y := sin(t * 2.5) * 6.0
-		draw_texture_rect_region(GIRO, Rect2(-42, -42 + y, 84, 84), Rect2(q * fw, 0, fw, GIRO.get_height()))
-		# brilho que pisca de vez em quando
-		var b := maxf(0.0, sin(t * 2.0 + 1.3) - 0.8) * 5.0
-		if b > 0.0:
-			draw_circle(Vector2(-14, -16 + y), 6.0 * b, Color(1, 1, 0.9, 0.9))
-
-
-class Porta extends StaticBody2D:
-	const TEX := preload("res://assets/ui/porta.png")
-	var usada := false
-	var t := 0.0
-
-	func _ready() -> void:
-		var f := CollisionShape2D.new()
-		f.name = "forma"
-		var r := RectangleShape2D.new()
-		r.size = Vector2(120, 290)
-		f.shape = r
-		f.position = Vector2(0, -145)
-		add_child(f)
-
-	func _process(d: float) -> void:
-		t += d
-		queue_redraw()
-
-	func _draw() -> void:
-		if not usada:
-			draw_circle(Vector2(0, -140), 120.0 + sin(t * 4.0) * 8.0, Color(1.0, 0.83, 0.3, 0.14))
-		draw_texture_rect(TEX, Rect2(-118, -300, 236, 300), false)
-		if not usada:
-			for i in 5:
-				var u := fmod(t * 0.45 + i * 0.2, 1.0)
-				draw_circle(Vector2(-45.0 + i * 22.0 + sin(t * 3.0 + i) * 6.0, -40.0 - u * 200.0), 4.0 * (1.0 - u), Color(1.0, 0.9, 0.5, 1.0 - u))
-		# "?" dourado com contorno, no centro do vão
-		var fonte := ThemeDB.fallback_font
-		var bob := sin(t * 3.0) * 5.0
-		draw_string_outline(fonte, Vector2(-26, -105 + bob), "?", HORIZONTAL_ALIGNMENT_LEFT, 60, 130, 10, Color("#14213D"))
-		draw_string(fonte, Vector2(-26, -105 + bob), "?", HORIZONTAL_ALIGNMENT_LEFT, 60, 130, Color("#FFD34E") if not usada else Color("#FFF2B0"))
-
-	func abrir() -> void:
-		get_node("forma").set_deferred("disabled", true)
-		var tw := create_tween().set_parallel(true)
-		tw.tween_property(self, "position:y", position.y - 460, 0.9).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
-		tw.tween_property(self, "modulate:a", 0.0, 0.9)
-
-
-class Bloco extends StaticBody2D:
-	const TEX := preload("res://assets/objetos/bloco.png")
-	var usado := false
-	var sensor: Area2D
-	var t := randf() * 6.0
-
-	func _ready() -> void:
-		var f := CollisionShape2D.new()
-		var r := RectangleShape2D.new()
-		r.size = Vector2(90, 90)
-		f.shape = r
-		add_child(f)
-		sensor = Area2D.new()
-		var fs := CollisionShape2D.new()
-		var rs := RectangleShape2D.new()
-		rs.size = Vector2(70, 40)
-		fs.shape = rs
-		fs.position = Vector2(0, 62)
-		sensor.add_child(fs)
-		add_child(sensor)
-
-	func _process(d: float) -> void:
-		t += d
-		if not usado:
-			queue_redraw()
-
-	func _draw() -> void:
-		var bri := 0.5 + 0.5 * sin(t * 4.0)
-		var cor := Color(0.55, 0.55, 0.6) if usado else Color(1, 1, 1).lerp(Color(1.12, 1.08, 0.9), bri)
-		draw_texture_rect(TEX, Rect2(-50, -50, 100, 98), false, cor)
-		if not usado:
-			var b2 := maxf(0.0, sin(t * 2.0 + 1.0))
-			var cx := -26.0 + fmod(t * 20.0, 52.0)
-			draw_line(Vector2(cx - 8, 30), Vector2(cx + 8, -30), Color(1, 1, 1, 0.25 * b2), 10.0)
-
-class Inimigo extends Area2D:
-	const TEX_P := preload("res://assets/objetos/preguica.png")
-	const TEX_D := preload("res://assets/objetos/distracao.png")
-	var tipo := "preguica"
-	var x_min := 0.0
-	var x_max := 0.0
-	var dir := 1.0
-	var vivo := true
-	var t := randf() * 6.0
-	var base_y := 0.0
-
-	func _ready() -> void:
-		var f := CollisionShape2D.new()
-		var r := RectangleShape2D.new()
-		r.size = Vector2(90, 70) if tipo == "preguica" else Vector2(70, 80)
-		f.shape = r
-		f.position = Vector2(0, -35) if tipo == "preguica" else Vector2.ZERO
-		add_child(f)
-		base_y = position.y
-
-	func _physics_process(d: float) -> void:
-		if not vivo:
-			return
-		t += d
-		position.x += dir * (70.0 if tipo == "preguica" else 130.0) * d
-		if position.x > x_max:
-			dir = -1.0
-		elif position.x < x_min:
-			dir = 1.0
-		if tipo == "distracao":
-			position.y = base_y + sin(t * 2.2) * 60.0
-		queue_redraw()
-
-	func _draw() -> void:
-		if tipo == "preguica":
-			var sq := 1.0 + 0.05 * sin(t * 3.0)
-			draw_set_transform(Vector2(0, 0), 0.0, Vector2(-dir * sq, 1.0 / sq))
-			draw_texture_rect(TEX_P, Rect2(-62, -112, 124, 114), false)
-		else:
-			draw_set_transform(Vector2(0, sin(t * 16.0) * 3.0), sin(t * 3.0) * 0.1, Vector2(dir, 1.0))
-			draw_texture_rect(TEX_D, Rect2(-62, -48, 124, 96), false)
-
-class Tronco extends AnimatableBody2D:
-	const TEX := preload("res://assets/objetos/tronco.png")
-	var x0 := 0.0
-	var amp := 120.0
-	var fase := 0.0
-	var t := 0.0
-	var w := 240.0
-
-	func _ready() -> void:
-		sync_to_physics = true
-		var f := CollisionShape2D.new()
-		var r := RectangleShape2D.new()
-		r.size = Vector2(w, 36)
-		f.shape = r
-		f.position = Vector2(0, 18)
-		f.one_way_collision = true
-		add_child(f)
-
-	func _physics_process(d: float) -> void:
-		t += d
-		position.x = x0 + sin(t * 1.1 + fase) * amp
-
-	func _draw() -> void:
-		draw_texture_rect(TEX, Rect2(-w / 2.0 - 10.0, -16, w + 20.0, 100), false)
-
-class Abismo extends Node2D:
-	var x1 := 0.0
-	var x2 := 0.0
-	var chao := 771.0
-	var agua := false
-	var t := 0.0
-
-	func _process(d: float) -> void:
-		t += d
-		queue_redraw()
-
-	func _draw() -> void:
-		var w := x2 - x1
-		var base := 1200.0
-		if agua:
-			var topo := chao + 22.0
-			# paredes de terra
-			draw_rect(Rect2(x1, chao - 4, w, base - chao), Color("#4A2E15"))
-			# agua em faixas de profundidade (do turquesa ao azul fundo)
-			var xa := x1 + 10.0
-			var xb := x2 - 10.0
-			var c1 := Color("#6FD8F0")
-			var c2 := Color("#2A8CC8")
-			var c3 := Color("#0B3A6E")
-			draw_polygon(PackedVector2Array([Vector2(xa, topo), Vector2(xb, topo), Vector2(xb, topo + 180.0), Vector2(xa, topo + 180.0)]), PackedColorArray([c1, c1, c2, c2]))
-			draw_polygon(PackedVector2Array([Vector2(xa, topo + 180.0), Vector2(xb, topo + 180.0), Vector2(xb, topo + 480.0), Vector2(xa, topo + 480.0)]), PackedColorArray([c2, c2, c3, c3]))
-			draw_rect(Rect2(xa, topo + 480.0, xb - xa, base - topo), c3)
-			# raios de luz
-			for k in int(w / 160.0):
-				var lx := x1 + 40.0 + k * 160.0 + sin(t * 0.8 + k) * 20.0
-				draw_colored_polygon(PackedVector2Array([Vector2(lx, topo), Vector2(lx + 40, topo), Vector2(lx + 110, topo + 220), Vector2(lx + 40, topo + 220)]), Color(1, 1, 1, 0.07))
-			# bolhas subindo
-			for k in int(w / 110.0):
-				var bx := x1 + 50.0 + k * 110.0 + sin(t + k * 2.0) * 12.0
-				var by := topo + 260.0 - fmod(t * 40.0 + k * 53.0, 240.0)
-				draw_arc(Vector2(bx, by), 5.0 + (k % 3) * 2.0, 0, TAU, 12, Color(1, 1, 1, 0.45), 2.0)
-			# ondas da superficie (duas camadas) e espuma
-			for camada in 2:
-				var pts := PackedVector2Array()
-				for k in 61:
-					var u := k / 60.0
-					pts.append(Vector2(x1 + 10.0 + u * (w - 20.0), topo + camada * 9.0 + sin(t * (2.6 + camada) + u * (20.0 + camada * 8.0)) * (6.0 - camada * 2.0)))
-				draw_polyline(pts, Color("#EAF9FF") if camada == 0 else Color(1, 1, 1, 0.45), 6.0 - camada * 2.0)
-			# brilhos
-			for k in int(w / 90.0):
-				var sx := x1 + 30.0 + k * 90.0 + fmod(t * 25.0 + k * 31.0, 60.0)
-				draw_circle(Vector2(sx, topo + 28.0 + (k % 4) * 14.0), 3.0, Color(1, 1, 1, 0.5 + 0.4 * sin(t * 3.0 + k)))
-			# pedras no fundo
-			for k in int(w / 220.0):
-				var rx := x1 + 70.0 + k * 220.0
-				draw_circle(Vector2(rx, base - 40.0), 34.0, Color("#0A2C52"))
-		else:
-			var topo2 := chao - 4.0
-			var ca := Color("#3A2A52")
-			var cb := Color("#150F26")
-			var cc := Color("#05030C")
-			draw_polygon(PackedVector2Array([Vector2(x1, topo2), Vector2(x2, topo2), Vector2(x2, topo2 + 260.0), Vector2(x1, topo2 + 260.0)]), PackedColorArray([ca, ca, cb, cb]))
-			draw_polygon(PackedVector2Array([Vector2(x1, topo2 + 260.0), Vector2(x2, topo2 + 260.0), Vector2(x2, base), Vector2(x1, base)]), PackedColorArray([cb, cb, cc, cc]))
-			# estratos de rocha
-			for k in int(w / 120.0) + 1:
-				var rx2 := x1 + k * 120.0 + (k % 3) * 18.0
-				var ry := topo2 + 40.0 + (k * 67 % 180)
-				draw_colored_polygon(PackedVector2Array([Vector2(rx2, ry), Vector2(rx2 + 70, ry - 8), Vector2(rx2 + 96, ry + 14), Vector2(rx2 + 30, ry + 26)]), Color(1, 1, 1, 0.05))
-			# estalactites pendendo da borda
-			for k in int(w / 70.0):
-				var sx2 := x1 + 20.0 + k * 70.0
-				var alt := 34.0 + float((k * 37) % 50)
-				draw_colored_polygon(PackedVector2Array([Vector2(sx2 - 18, topo2), Vector2(sx2 + 18, topo2), Vector2(sx2, topo2 + alt)]), Color("#4A3868"))
-			# nevoa subindo e poeira brilhante
-			for k in int(w / 200.0) + 1:
-				var nx := x1 + 60.0 + k * 200.0 + sin(t * 0.6 + k) * 40.0
-				draw_circle(Vector2(nx, topo2 + 200.0 + sin(t * 0.9 + k * 2.0) * 20.0), 90.0, Color(0.6, 0.5, 0.9, 0.06))
-			for k in int(w / 90.0):
-				var py := topo2 + 400.0 - fmod(t * 30.0 + k * 71.0, 380.0)
-				draw_circle(Vector2(x1 + 30.0 + k * 90.0 + sin(t + k) * 10.0, py), 2.5, Color(1.0, 0.85, 0.5, 0.5))
-			draw_rect(Rect2(x1, base - 90.0, w, 90.0), Color("#05030C"))
-		# bordas: parede de terra com tufo de grama
-		for lado in 2:
-			var bx2 := x1 - 16.0 if lado == 0 else x2
-			draw_rect(Rect2(bx2, chao - 4, 16.0, 420.0), Color("#5A3B22"))
-			draw_rect(Rect2(bx2 + (0.0 if lado == 1 else 0.0), chao - 4, 16.0, 14.0), Color("#4CAF50"))
-		draw_rect(Rect2(x1 - 6.0, chao - 8.0, 22.0, 12.0), Color("#5FCB5F"))
-		draw_rect(Rect2(x2 - 16.0, chao - 8.0, 22.0, 12.0), Color("#5FCB5F"))
-
-class Plat extends StaticBody2D:
-	const TEX := preload("res://assets/objetos/plataforma.png")
-	const TEX_PEDRA := preload("res://assets/ui/plataforma_pedra.png")
-	var w := 190.0
-	var h := 34.0
-	var cor := Color("#1B5AA6")
-	var texto := ""
-	var correta := false
-	var vivo := true
-	var destaque := false
-	var progresso := 0.0
-	var t := 0.0
-	var sensor: Area2D
-	var shape: CollisionShape2D
-
-	func _process(d: float) -> void:
-		if destaque and vivo:
-			t += d
-			queue_redraw()
-
-	func montar(uma_via: bool, com_sensor: bool) -> void:
-		shape = CollisionShape2D.new()
-		var r := RectangleShape2D.new()
-		r.size = Vector2(w, h)
-		shape.shape = r
-		shape.position = Vector2(0, h / 2.0)
-		shape.one_way_collision = uma_via
-		add_child(shape)
-		if com_sensor:
-			sensor = Area2D.new()
-			var f := CollisionShape2D.new()
-			var rs := RectangleShape2D.new()
-			rs.size = Vector2(w - 30.0, 56.0)
-			f.shape = rs
-			f.position = Vector2(0, -8)
-			sensor.add_child(f)
-			add_child(sensor)
-			var l := Label.new()
-			l.text = texto
-			l.position = Vector2(-w / 2.0 - 40.0, -118)
-			l.size = Vector2(w + 80.0, 80)
-			l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			l.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
-			l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			l.add_theme_font_size_override("font_size", 34)
-			l.add_theme_color_override("font_color", Color.WHITE)
-			l.add_theme_color_override("font_outline_color", Color("#14213D"))
-			l.add_theme_constant_override("outline_size", 12)
-			add_child(l)
-
-	## ponte de tábuas que fecha o buraco: madeira, pregos dourados e corda
-	func _desenhar_ponte() -> void:
-		var x0 := -w / 2.0
-		var corpo := StyleBoxFlat.new()
-		corpo.bg_color = Color("#8B5A2B")
-		corpo.set_corner_radius_all(10)
-		corpo.border_color = Color("#3B2412")
-		corpo.set_border_width_all(4)
-		draw_style_box(corpo, Rect2(x0, 0, w, 58))
-		var n := int(w / 64.0)
-		var tabua := w / n
-		for i in n:
-			var tx := x0 + i * tabua
-			var tom := Color("#A86F38") if i % 2 == 0 else Color("#9A6230")
-			draw_rect(Rect2(tx + 3, 5, tabua - 6, 48), tom)
-			draw_rect(Rect2(tx + 3, 5, tabua - 6, 11), Color(1, 0.85, 0.55, 0.35))
-			draw_line(Vector2(tx + 3, 54), Vector2(tx + tabua - 3, 54), Color(0, 0, 0, 0.35), 3.0)
-			draw_circle(Vector2(tx + 12, 28), 3.5, Color("#FFD34E"))
-			draw_circle(Vector2(tx + tabua - 12, 28), 3.5, Color("#FFD34E"))
-		# vigas de sustentação por baixo
-		for i in 3:
-			var vx := x0 + w * (0.12 + i * 0.38)
-			draw_rect(Rect2(vx, 58, 22, 40), Color("#5A3920"))
-		# corda e musgo na frente
-		draw_line(Vector2(x0 + 6, 2), Vector2(x0 + w - 6, 2), Color("#E8D29A"), 5.0)
-		for i in int(w / 150.0):
-			draw_circle(Vector2(x0 + 40 + i * 150.0, 58), 14.0, Color("#4CAF50"))
-
-	func _draw() -> void:
-		if sensor == null and h <= 40.0:
-			draw_texture_rect(TEX, Rect2(-w / 2.0 - 8.0, -26, w + 16.0, 86), false)
-			return
-		if sensor == null and h > 40.0:
-			_desenhar_ponte()
-			return
-		# plataforma de pedra (arte do Gemini); o estado muda a cor e o brilho
-		var k := 0.5 + 0.5 * sin(t * 8.0)
-		var tw := w + 6.0
-		var th := tw * TEX_PEDRA.get_height() / float(TEX_PEDRA.get_width())
-		var ret := Rect2(-tw / 2.0, -14.0, tw, th)
-		var tom := Color(1, 1, 1)
-		if destaque and vivo:
-			tom = Color(0.8, 1.4, 0.85).lerp(Color(1.1, 1.6, 1.0), k)
-			draw_circle(Vector2(0, 14), w * 0.62, Color(0.3, 1.0, 0.5, 0.10 + 0.12 * k))
-		elif not vivo:
-			tom = Color(1.6, 0.55, 0.55, 0.75)
-		draw_texture_rect(TEX_PEDRA, ret, false, tom)
-		if progresso > 0.0:
-			var pb := StyleBoxFlat.new()
-			pb.bg_color = Color("#FFD34E")
-			pb.set_corner_radius_all(8)
-			pb.border_color = Color("#14213D")
-			pb.set_border_width_all(3)
-			draw_style_box(pb, Rect2(-w / 2.0 + 14.0, -6.0, maxf(14.0, (w - 28.0) * progresso), 18.0))
-		if destaque and vivo:
-			for i in 4:
-				var u := fmod(t * 0.7 + i * 0.25, 1.0)
-				draw_circle(Vector2(-w / 2.0 + w * fmod(i * 0.37 + 0.1, 1.0), -u * 70.0), 4.0 * (1.0 - u), Color(0.8, 1.0, 0.7, 1.0 - u))
-
-
-class Bandeira extends Node2D:
-	const LOGO_A := preload("res://assets/logos/adventista_branco.png")
-	const LOGO_FAP := preload("res://assets/logos/fap_branco.svg")
-	const TEX_CP := preload("res://assets/ui/bandeira_checkpoint.png")
-	const TEX_FIM := preload("res://assets/ui/bandeira_final.png")
-	var cor := Color("#0B3A6E")
-	var escala := 1.0
-	var final := false
-	var ativa := false:
-		set(v):
-			if v and not ativa:
-				rajada = 1.0
-			ativa = v
-	var rajada := 0.0
-	var t := randf() * 5.0
-
-	func _process(d: float) -> void:
-		t += d
-		rajada = maxf(0.0, rajada - d * 0.8)
-		queue_redraw()
-
-	## desenha a textura em faixas verticais que ondulam como pano ao vento
-	func _pano(tex: Texture2D, r: Rect2, tom: Color, amp: float, fase: float) -> void:
-		var n := 24
-		var tw := tex.get_width() / float(n)
-		for i in n:
-			var u := i / float(n - 1)
-			var solta := clampf((u - 0.18) / 0.82, 0.0, 1.0)
-			var dy := sin(t * 4.0 + u * 5.0 + fase) * amp * solta
-			var dx := cos(t * 3.0 + u * 4.0 + fase) * amp * 0.3 * solta
-			draw_texture_rect_region(tex, Rect2(r.position.x + r.size.x * u + dx, r.position.y + dy, r.size.x / n + 1.0, r.size.y), Rect2(i * tw, 0, tw, tex.get_height()), tom)
-
-	func _draw() -> void:
-		if final:
-			var h := 420.0
-			var w := h * TEX_FIM.get_width() / float(TEX_FIM.get_height())
-			var k := 0.5 + 0.5 * sin(t * 2.0)
-			draw_circle(Vector2(w * 0.25, -h * 0.7), 190.0 + sin(t * 3.0) * 8.0, Color(1.0, 0.83, 0.3, 0.07 + 0.06 * k))
-			# raios girando atrás da bandeira
-			for i in 8:
-				var a := t * 0.5 + i * TAU / 8.0
-				var c := Vector2(w * 0.3, -h * 0.65)
-				draw_colored_polygon(PackedVector2Array([c, c + Vector2(cos(a - 0.08), sin(a - 0.08)) * 330.0, c + Vector2(cos(a + 0.08), sin(a + 0.08)) * 330.0]), Color(1.0, 0.9, 0.5, 0.07))
-			_pano(TEX_FIM, Rect2(-w * 0.08, -h, w, h), Color(1, 1, 1), 7.0, 0.0)
-			# confete e estrelinhas subindo
-			for i in 14:
-				var u := fmod(t * 0.35 + i * 0.0714, 1.0)
-				var px := -40.0 + float((i * 53) % 230) + sin(t * 2.0 + i) * 14.0
-				var cor_c: Color = [Color("#FFD34E"), Color("#4DD2FF"), Color("#FF7AA8"), Color("#7CFF9B")][i % 4]
-				draw_circle(Vector2(px, -u * 460.0), 5.0 * (1.0 - u * 0.6), Color(cor_c.r, cor_c.g, cor_c.b, 1.0 - u))
-		else:
-			var h := 300.0 * escala
-			var w := h * TEX_CP.get_width() / float(TEX_CP.get_height())
-			var tom := Color(1.5, 1.25, 0.45) if ativa else Color(1, 1, 1)
-			if ativa:
-				draw_circle(Vector2(w * 0.3, -h * 0.6), 80.0 * escala + sin(t * 4.0) * 6.0, Color(1.0, 0.85, 0.3, 0.12))
-			_pano(TEX_CP, Rect2(-w * 0.2, -h, w, h), tom, 5.0 * escala, 0.0)
-			var lw := 40.0 * escala
-			draw_texture_rect(LOGO_A, Rect2(-w * 0.2 + w * 0.42 - lw / 2.0, -h + h * 0.26 - lw * 0.46 + sin(t * 4.0 + 2.0) * 4.0, lw, lw * 0.91), false)
-			# explosão de faíscas ao ativar
-			if rajada > 0.0:
-				for i in 18:
-					var a := i * TAU / 18.0
-					var dist := (1.0 - rajada) * 170.0 * escala
-					draw_circle(Vector2(w * 0.3, -h * 0.65) + Vector2(cos(a), sin(a)) * dist, 6.0 * rajada, Color(1.0, 0.85, 0.3, rajada))
-			elif ativa:
-				for i in 3:
-					var u := fmod(t * 0.6 + i * 0.33, 1.0)
-					draw_circle(Vector2(w * 0.1 + i * w * 0.2, -h * 0.4 - u * h * 0.6), 3.5, Color(1.0, 0.9, 0.5, 1.0 - u))
-
-
-class Progresso extends Control:
-	const BANDEIRA := preload("res://assets/ui/bandeira_checkpoint.png")
-	var fim_x := 7000.0
-	var x_jog := 0.0
-	var marcas: Array = []
-	var checks: Array = []
-	var feitos := 0
-	var total := 0
-
-	const LOGO := preload("res://assets/logos/adventista_branco.png")
-	var t := 0.0
-
-	func _process(d: float) -> void:
-		t += d
-		queue_redraw()
-
-	func _draw() -> void:
-		var x0 := 70.0
-		var larg := size.x - 140.0
-		var y := 38.0
-		var r := clampf(x_jog / fim_x, 0.0, 1.0)
-		var navy := Color("#14213D")
-		# moldura azul com borda dourada, no mesmo estilo dos painéis
-		var mold := StyleBoxFlat.new()
-		mold.bg_color = Color(0.04, 0.14, 0.34, 0.92)
-		mold.set_corner_radius_all(30)
-		mold.border_color = Color("#FFD34E")
-		mold.set_border_width_all(4)
-		mold.shadow_color = Color(0, 0, 0, 0.35)
-		mold.shadow_size = 8
-		draw_style_box(mold, Rect2(0, y - 26, size.x, 86))
-		# trilho
-		var trilho := StyleBoxFlat.new()
-		trilho.bg_color = Color(0.01, 0.05, 0.14, 0.9)
-		trilho.set_corner_radius_all(14)
-		trilho.border_color = Color(1, 1, 1, 0.25)
-		trilho.set_border_width_all(2)
-		draw_style_box(trilho, Rect2(x0 - 10, y - 14, larg + 20, 28))
-		if r > 0.01:
-			var cheio := StyleBoxFlat.new()
-			cheio.bg_color = Color("#F5B820")
-			cheio.set_corner_radius_all(11)
-			draw_style_box(cheio, Rect2(x0 - 6, y - 10, larg * r + 6, 20))
-			var luz := StyleBoxFlat.new()
-			luz.bg_color = Color(1, 0.97, 0.7, 0.55)
-			luz.set_corner_radius_all(5)
-			draw_style_box(luz, Rect2(x0, y - 8, maxf(10.0, larg * r - 8), 6))
-			# brilho que percorre o preenchimento
-			var sx := x0 + fmod(t * 140.0, maxf(40.0, larg * r))
-			draw_circle(Vector2(sx, y), 7.0, Color(1, 1, 1, 0.35))
-		for c in checks:
-			var cx: float = x0 + larg * clampf(c / fim_x, 0.0, 1.0)
-			draw_line(Vector2(cx, y - 24), Vector2(cx, y - 8), Color.WHITE, 3.0)
-			draw_colored_polygon(PackedVector2Array([Vector2(cx, y - 24), Vector2(cx + 13, y - 19), Vector2(cx, y - 14)]), Color("#7CFF9B") if c <= x_jog else Color("#9FD8F5"))
-		# marcos dos desafios: medalhas com "?"; viram verdes com ✓ quando passa
-		var fonte := ThemeDB.fallback_font
-		for m in marcas:
-			var mx: float = x0 + larg * clampf(m / fim_x, 0.0, 1.0)
-			var feito: bool = m <= x_jog
-			draw_circle(Vector2(mx, y), 14.0, navy)
-			draw_circle(Vector2(mx, y), 11.5, Color("#3DBE6C") if feito else Color("#4DB6E8"))
-			draw_string(fonte, Vector2(mx - 6, y + 8), "✓" if feito else "?", HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color.WHITE)
-		# bandeira de chegada
-		draw_texture_rect(BANDEIRA, Rect2(x0 + larg + 2, y - 36, 44, 56), false)
-		# jogador: medalha dourada com o símbolo da rede adventista
-		var px := x0 + larg * r
-		var pulso := 1.0 + 0.06 * sin(t * 5.0)
-		draw_circle(Vector2(px, y), 24.0 * pulso, Color(1, 0.85, 0.3, 0.25))
-		draw_circle(Vector2(px, y), 20.0, navy)
-		draw_circle(Vector2(px, y), 17.0, Color("#FFD34E"))
-		draw_texture_rect(LOGO, Rect2(px - 11, y - 10, 22, 20), false, Color("#14213D"))
-		# contador de desafios
-		var txt := "Desafios  %d / %d" % [feitos, total]
-		var tw := fonte.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x
-		draw_string_outline(fonte, Vector2((size.x - tw) / 2.0, y + 46), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 24, 7, navy)
-		draw_string(fonte, Vector2((size.x - tw) / 2.0, y + 46), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 24, Color.WHITE)
-
-
-class Coracoes extends Control:
-	const TEX := preload("res://assets/objetos/coracao.png")
-	var cheios := 3
-	var total := 3
-
-	func _draw() -> void:
-		for i in total:
-			var cor := Color(1, 1, 1, 1) if i < cheios else Color(0.1, 0.1, 0.15, 0.45)
-			draw_texture_rect(TEX, Rect2(10 + i * 84, 6, 72, 64), false, cor)
-

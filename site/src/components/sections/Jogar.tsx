@@ -1,9 +1,9 @@
-import { Botao } from "@/components/ui/Botao";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Revelar } from "@/components/ui/Revelar";
 import { Titulo } from "@/components/ui/Titulo";
 import { FAQ } from "@/content/faq";
 import { img } from "@/lib/assets";
+import { PainelDownload } from "./PainelDownload";
 import estilos from "./Jogar.module.css";
 
 export function Jogar() {
@@ -13,14 +13,10 @@ export function Jogar() {
         <Eyebrow>Pronto para a aventura?</Eyebrow>
         <Titulo linhas={["Sua jornada", "começa agora"]} centralizado />
         <Revelar como="p" atraso={1} className={estilos.lead}>
-          Em breve: jogue direto no navegador e no celular. Enquanto isso, a versão para computador está em testes com a equipe
-          da FAP.
+          Baixe para o seu computador ou jogue agora no navegador, inclusive no celular. É gratuito e o progresso fica salvo.
         </Revelar>
-        <Revelar atraso={2} className={estilos.acoes}>
-          <Botao variante="ouro" desativado icone="play">
-            Jogar — em breve
-          </Botao>
-          <Botao href="#galeria">Rever as telas</Botao>
+        <Revelar atraso={2}>
+          <PainelDownload />
         </Revelar>
 
         <Revelar atraso={3} className={estilos.faq}>

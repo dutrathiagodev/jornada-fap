@@ -97,7 +97,7 @@ func _process(d: float) -> void:
 
 func _unhandled_input(ev: InputEvent) -> void:
 	# a arte da capa diz "Pressione [ESPAÇO]": Espaço, Enter e o botão A começam o jogo
-	if ev.is_action_pressed("confirmar") or ev.is_action_pressed("pular"):
+	if ev.is_action_pressed("confirmar") or ev.is_action_pressed("pular") or (ev is InputEventMouseButton and ev.pressed):
 		Jogo.sfx("clique")
 		get_tree().change_scene_to_file("res://mapa.tscn")
 

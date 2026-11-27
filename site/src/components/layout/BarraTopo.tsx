@@ -27,7 +27,7 @@ export function BarraTopo() {
         <a className={estilos.link} href="#cidades">
           As cidades
         </a>
-        <Botao href="#jogar">Quero jogar</Botao>
+        <Botao href="#jogar" icone="baixar">Baixar</Botao>
       </nav>
     </header>
   );

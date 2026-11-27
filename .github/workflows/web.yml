@@ -1,0 +1,53 @@
+name: Jogo no navegador
+
+# Exporta o jogo para a web (funciona no celular e no computador) e publica no GitHub Pages:
+# https://dutrathiagodev.github.io/jornada-fap/
+on:
+  push:
+    branches: [main]
+    paths: ["jogo/**", ".github/workflows/web.yml"]
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "4.7.2"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Baixar o Godot e os modelos de exportação
+        run: |
+          base="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable"
+          curl -fsSL -o godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          curl -fsSL -o templates.tpz "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          unzip -q godot.zip
+          mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
+          mkdir -p ~/.local/share/godot/export_templates
+          unzip -q templates.tpz -d tpl
+          mv tpl/templates ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+      - name: Exportar para a web
+        working-directory: jogo
+        run: |
+          godot --headless --import || true
+          mkdir -p build/web
+          godot --headless --export-release "Web" build/web/index.html
+          ls -la build/web
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: jogo/build/web
+      - id: deploy
+        uses: actions/deploy-pages@v4

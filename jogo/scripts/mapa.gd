@@ -147,9 +147,10 @@ func _ready() -> void:
 			var e := _rot(painel, "bloqueada", 32, Vector2(10, 470), Color(1, 1, 1, 0.6))
 			e.position = Vector2(170 - 960, 470)
 		cartoes.append(painel)
+		painel.gui_input.connect(_ao_tocar_cartao.bind(i))
 
 	info = _rot(ui, "", 34, Vector2(0, 890), Color.WHITE)
-	_rot(ui, Jogo.dica("← →  escolher     Enter  jogar     Esc  voltar", "Direcional  escolher     A  jogar     B  voltar", "Direcional  escolher     Cruz  jogar     Bolinha  voltar"), 30, Vector2(0, 1000), Color(1, 1, 1, 0.85))
+	_rot(ui, Jogo.dica("← →  escolher     Enter  jogar     Esc  voltar" if not ControlesToque.deve_aparecer() else "Toque na cidade para escolher e toque de novo para jogar", "Direcional  escolher     A  jogar     B  voltar", "Direcional  escolher     Cruz  jogar     Bolinha  voltar"), 30, Vector2(0, 1000), Color(1, 1, 1, 0.85))
 	if Jogo.terminou_tudo():
 		_rot(ui, "P  ver meu prêmio", 36, Vector2(0, 945), OURO)
 	_atualizar()
@@ -196,6 +197,27 @@ func _process(d: float) -> void:
 	cartoes[sel].position.y = 290 - 8 + sin(t * 4.0) * 6.0
 
 
+## toque (ou clique) num cartão: o primeiro seleciona, o segundo entra na cidade
+func _ao_tocar_cartao(ev: InputEvent, i: int) -> void:
+	if not (ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT):
+		return
+	if not Jogo.liberada(i):
+		return
+	if i == sel:
+		_jogar_cidade()
+	else:
+		cartoes[sel].position.y = 290
+		Jogo.sfx("clique")
+		sel = i
+		_atualizar()
+
+
+func _jogar_cidade() -> void:
+	Jogo.cidade_atual = sel
+	Jogo.sfx("clique")
+	get_tree().change_scene_to_file("res://fase.tscn")
+
+
 func _unhandled_input(ev: InputEvent) -> void:
 	if ev.is_action_pressed("mover_direita") and sel < 4 and Jogo.liberada(sel + 1):
 		cartoes[sel].position.y = 290
@@ -208,9 +230,7 @@ func _unhandled_input(ev: InputEvent) -> void:
 		sel -= 1
 		_atualizar()
 	elif ev.is_action_pressed("confirmar"):
-		Jogo.cidade_atual = sel
-		Jogo.sfx("clique")
-		get_tree().change_scene_to_file("res://fase.tscn")
+		_jogar_cidade()
 	elif ev.is_action_pressed("voltar"):
 		get_tree().change_scene_to_file("res://main.tscn")
 	elif ev is InputEventKey and ev.pressed and not ev.echo:
