@@ -6,6 +6,7 @@ const Jogador := preload("res://scripts/jogador.gd")
 const NOITE := Color("#14213D")
 const OURO := Color("#FFD34E")
 var t := 0.0
+var _iniciando := false
 
 
 func _ready() -> void:
@@ -21,8 +22,10 @@ func _ready() -> void:
 	capa.size = Vector2(1920, 1080)
 	capa.pivot_offset = Vector2(960, 540)
 	capa.name = "capa"
+	capa.mouse_filter = Control.MOUSE_FILTER_IGNORE  # senão engole o clique/toque que inicia o jogo
 	add_child(capa)
 	var br := Brilhos.new()
+	br.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	capa.add_child(br)
 	var ui := CanvasLayer.new()
 	add_child(ui)
@@ -34,10 +37,21 @@ func _ready() -> void:
 	sb.border_color = Color(1, 0.85, 0.35, 0.9)
 	sb.set_border_width_all(4)
 	selo.add_theme_stylebox_override("panel", sb)
+	selo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	selo.position = Vector2(1440, 26)
 	selo.size = Vector2(440, 160)
 	ui.add_child(selo)
 	_logo(ui, "res://assets/logos/fap_branco.svg", Vector2(1480, 42), 360, 126)
+	# área de toque em tela cheia: clique do mouse ou toque no celular começam o jogo
+	var area := Control.new()
+	area.size = Vector2(1920, 1080)
+	area.gui_input.connect(_ao_tocar)
+	ui.add_child(area)
+	if ControlesToque.deve_aparecer():
+		var toque := _rotulo(ui, "Toque na tela para jogar", 52, Vector2(0, 850), Color.WHITE)
+		toque.add_theme_constant_override("outline_size", 16)
+		toque.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		create_tween().set_loops().tween_property(toque, "modulate:a", 0.35, 0.8).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT).from(1.0)
 	var tot := Jogo.total_estrelas()
 	if tot > 0:
 		_rotulo(ui, "★ %d de 15 estrelas" % tot, 44, Vector2(-380, 880), OURO)
@@ -80,6 +94,7 @@ func _rotulo(pai: Node, texto: String, tam: int, pos: Vector2, cor: Color) -> La
 	l.add_theme_color_override("font_color", cor)
 	l.add_theme_color_override("font_outline_color", NOITE)
 	l.add_theme_constant_override("outline_size", 14)
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	pai.add_child(l)
 	return l
 
@@ -96,10 +111,24 @@ func _process(d: float) -> void:
 
 
 func _unhandled_input(ev: InputEvent) -> void:
-	# a arte da capa diz "Pressione [ESPAÇO]": Espaço, Enter e o botão A começam o jogo
-	if ev.is_action_pressed("confirmar") or ev.is_action_pressed("pular") or (ev is InputEventMouseButton and ev.pressed):
-		Jogo.sfx("clique")
-		get_tree().change_scene_to_file("res://mapa.tscn")
+	# a arte da capa diz "Pressione [ESPAÇO]": Espaço, Enter e o botão A também começam o jogo
+	if ev.is_action_pressed("confirmar") or ev.is_action_pressed("pular"):
+		_comecar()
+
+
+## clique esquerdo do mouse ou toque na tela
+func _ao_tocar(ev: InputEvent) -> void:
+	var clicou: bool = ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT
+	if clicou or (ev is InputEventScreenTouch and ev.pressed):
+		_comecar()
+
+
+func _comecar() -> void:
+	if _iniciando:
+		return
+	_iniciando = true
+	Jogo.sfx("clique")
+	get_tree().change_scene_to_file("res://mapa.tscn")
 
 
 func _logo(pai: Node, caminho: String, pos: Vector2, larg: float, alt := -1.0) -> void:
