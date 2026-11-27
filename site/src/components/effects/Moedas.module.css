@@ -29,3 +29,14 @@
     translate: 0 -22px;
   }
 }
+
+@media (max-width: 700px) {
+  .moeda {
+    --tam: 38px;
+    opacity: 0.8;
+  }
+
+  .moeda:nth-child(n + 6) {
+    display: none;
+  }
+}
