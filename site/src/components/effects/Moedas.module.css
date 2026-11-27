@@ -1,0 +1,31 @@
+.moedas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.moeda {
+  --tam: 52px;
+  position: absolute;
+  width: var(--tam);
+  height: var(--tam);
+  background: var(--sprite) 0 0 / auto 100% no-repeat;
+  opacity: 0.9;
+  filter: drop-shadow(0 6px 10px #0007);
+  animation:
+    girar 0.9s steps(32) infinite,
+    flutuar 4s ease-in-out infinite;
+}
+
+@keyframes girar {
+  to {
+    background-position: calc(var(--tam) * -32) 0;
+  }
+}
+
+@keyframes flutuar {
+  50% {
+    translate: 0 -22px;
+  }
+}

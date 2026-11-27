@@ -1,0 +1,35 @@
+.faixa {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px 28px;
+  padding: 22px var(--margem) 22px;
+  background: linear-gradient(transparent, #080b11e8 55%);
+  border-top: 1px solid var(--ouro-fosco);
+}
+
+/* losango central sobre o friso */
+.topo {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 15px;
+  height: 15px;
+  translate: -50% 0;
+  rotate: 45deg;
+  background: var(--noite-2);
+  border: 1.5px solid var(--ouro);
+}
+
+.texto {
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: clamp(0.8rem, 1.4vw, 1.05rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--creme);
+}

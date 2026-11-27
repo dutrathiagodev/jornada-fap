@@ -1,0 +1,135 @@
+.cidades {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  padding: 110px var(--margem) 90px;
+  background: linear-gradient(#080b11, #0d111a);
+  scroll-snap-align: start;
+}
+
+.lista {
+  display: flex;
+  gap: 14px;
+  height: min(58vh, 540px);
+  margin-top: 30px;
+}
+
+.cartao {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  background: #000;
+  border: 1px solid #a88b5266;
+  outline-offset: -4px;
+  transition:
+    flex 0.7s var(--curva),
+    border-color 0.3s;
+}
+
+/* moldura interna fina, como nas placas do site de referência */
+.cartao::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid #a88b5255;
+  pointer-events: none;
+  transition: border-color 0.3s;
+}
+
+.aberto {
+  flex: 3.4;
+  border-color: var(--ouro);
+}
+
+.aberto::after {
+  border-color: var(--ouro);
+}
+
+.foto {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.7) brightness(0.6);
+  transition:
+    transform 1s var(--curva),
+    filter 0.5s;
+}
+
+.aberto .foto {
+  filter: none;
+  transform: scale(1.06);
+}
+
+.info {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: grid;
+  gap: 4px;
+  padding: 26px 24px;
+  background: linear-gradient(transparent, #080b11f5 60%);
+}
+
+.fase {
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ouro);
+}
+
+.nome {
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 1.45rem;
+  line-height: 1.1;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.detalhe {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  color: var(--suave);
+  font-size: 0.96rem;
+  line-height: 1.5;
+  transition:
+    max-height 0.7s var(--curva),
+    opacity 0.5s 0.15s;
+}
+
+.detalhe b {
+  color: var(--ouro);
+}
+
+.aberto .detalhe {
+  max-height: 180px;
+  opacity: 1;
+  margin-top: 8px;
+}
+
+@media (max-width: 900px) {
+  .lista {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .cartao {
+    flex: none;
+    min-height: 130px;
+  }
+
+  .aberto {
+    min-height: 270px;
+  }
+}

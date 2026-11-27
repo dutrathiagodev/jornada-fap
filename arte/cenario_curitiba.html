@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<title>Cenario Curitiba</title>
+<style>html,body{margin:0;padding:0;background:transparent;overflow:hidden}svg{display:block}</style>
+</head>
+<body>
+<!--
+  Cenario da fase 1 (Curitiba) em estilo cartoon, 1920x1080, em camadas para parallax.
+  Uso: cenario_curitiba.html?layer=ceu|serra|morros|jardim|chao|tudo
+  As camadas serra, morros e chao repetem na horizontal (largura 1920) sem emenda.
+-->
+<div id="root"></div>
+<script>
+const W = 1920, H = 1080;
+const layer = new URLSearchParams(location.search).get('layer') || 'tudo';
+
+// ruido periodico (repete a cada W px) -> camadas emendam sem costura
+function ridge(base, terms, step = 6) {
+  const pts = [];
+  for (let x = 0; x <= W; x += step) {
+    let y = base;
+    for (const [k, a, ph, sharp] of terms) {
+      const s = Math.sin(2 * Math.PI * k * x / W + ph);
+      y -= sharp ? a * (1 - Math.abs(s)) : a * s;
+    }
+    pts.push([x, y]);
+  }
+  return pts;
+}
+const yAt = (pts, x) => { const i = Math.min(pts.length - 2, Math.floor(x / (W / (pts.length - 1))));
+  const [x0, y0] = pts[i], [x1, y1] = pts[i + 1]; return y0 + (y1 - y0) * (x - x0) / (x1 - x0); };
+const area = (pts, bottom = H) => `M 0,${bottom} ` + pts.map(([x, y]) => `L ${x.toFixed(1)},${y.toFixed(1)}`).join(' ') + ` L ${W},${bottom} Z`;
+const line = pts => 'M ' + pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' L ');
+
+// ---------- CEU ----------
+function cloud(x, y, s) {
+  const c = [[0, 0, 46], [52, -22, 58], [112, -6, 50], [160, 10, 36], [-40, 14, 32], [70, 18, 40]];
+  const circ = (f, dy = 0, grow = 0) => c.map(([cx, cy, r]) => `<circle cx="${cx}" cy="${cy + dy}" r="${r + grow}" fill="${f}"/>`).join('');
+  return `<g transform="translate(${x},${y}) scale(${s})">
+    <g opacity=".35">${circ('#9CCBE6', 8, 4)}</g>
+    ${circ('#D3EAF6', 6)}
+    ${circ('#FFFFFF')}
+    <ellipse cx="40" cy="-30" rx="26" ry="10" fill="#fff" opacity=".9"/>
+  </g>`;
+}
+function ceu() {
+  return `
+  <defs>
+    <linearGradient id="gCeu" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4FB1E4"/><stop offset=".55" stop-color="#9AD6F2"/><stop offset=".8" stop-color="#DDF3FB"/><stop offset="1" stop-color="#F3FBFE"/>
+    </linearGradient>
+    <radialGradient id="gSol"><stop offset="0" stop-color="#FFF6C8"/><stop offset=".35" stop-color="#FFE9A0" stop-opacity=".9"/><stop offset="1" stop-color="#FFE9A0" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="${W}" height="${H}" fill="url(#gCeu)"/>
+  <circle cx="1560" cy="190" r="260" fill="url(#gSol)"/>
+  <circle cx="1560" cy="190" r="78" fill="#FFF1B0"/>
+  <circle cx="1560" cy="190" r="66" fill="#FFE27A"/>
+  ${cloud(180, 200, 1.1)}${cloud(820, 130, 0.8)}${cloud(1220, 300, 0.65)}${cloud(560, 360, 0.55)}${cloud(1700, 420, 0.7)}`;
+}
+
+// ---------- SERRA DO MAR (montanhas ao fundo) ----------
+function serra() {
+  const r1 = ridge(560, [[2, 60, 0.3, true], [3, 70, 1.7, true], [5, 40, 0.9, true], [11, 12, 2.2, false], [17, 6, 0.4, false]]);
+  const r2 = ridge(660, [[2, 40, 2.1, true], [4, 55, 0.2, true], [7, 30, 1.3, true], [13, 8, 0.7, false]]);
+  const hl1 = r1.map(([x, y]) => [x, y + 2]);
+  return `
+  <defs>
+    <linearGradient id="gS1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8FBCD9"/><stop offset="1" stop-color="#BFDDEE"/></linearGradient>
+    <linearGradient id="gS2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6FA6C8"/><stop offset="1" stop-color="#A9D0E6"/></linearGradient>
+  </defs>
+  <path d="${area(r1)}" fill="url(#gS1)"/>
+  <path d="${line(hl1)}" stroke="#D8ECF7" stroke-width="5" fill="none" opacity=".7"/>
+  <path d="${area(r2)}" fill="url(#gS2)"/>
+  <path d="${line(r2.map(([x, y]) => [x, y + 2]))}" stroke="#CDE5F2" stroke-width="4" fill="none" opacity=".6"/>`;
+}
+
+// ---------- MORROS com ARAUCARIAS ----------
+function araucaria(x, y, h, cor, corL, tronco) {
+  // tronco reto + galhos em "candelabro" formando copa achatada no topo
+  const w = h * 0.62, top = y - h;
+  let s = `<g>`;
+  s += `<path d="M ${x - h * 0.025},${y} L ${x - h * 0.015},${top + h * 0.12} L ${x + h * 0.015},${top + h * 0.12} L ${x + h * 0.025},${y} Z" fill="${tronco}"/>`;
+  // galhos (arcos para cima)
+  const tiers = [[0.10, 1.0], [0.20, 0.86], [0.30, 0.66], [0.40, 0.42]];
+  for (const [t, ww] of tiers) {
+    const yy = top + h * t, hw = w * ww / 2;
+    s += `<path d="M ${x},${yy + h * 0.06} Q ${x - hw * 0.6},${yy + h * 0.05} ${x - hw},${yy - h * 0.035}" stroke="${tronco}" stroke-width="${h * 0.014}" fill="none"/>`;
+    s += `<path d="M ${x},${yy + h * 0.06} Q ${x + hw * 0.6},${yy + h * 0.05} ${x + hw},${yy - h * 0.035}" stroke="${tronco}" stroke-width="${h * 0.014}" fill="none"/>`;
+  }
+  // copa: tufos ao longo do topo dos galhos
+  const tufos = [];
+  for (const [t, ww] of tiers) {
+    const yy = top + h * t, hw = w * ww / 2, n = Math.max(2, Math.round(ww * 5));
+    for (let i = 0; i <= n; i++) {
+      const xx = x - hw + (2 * hw) * i / n;
+      const lift = Math.pow(Math.abs(xx - x) / hw, 2) * h * 0.035;
+      tufos.push([xx, yy - lift, h * 0.055 * (0.8 + 0.4 * ww)]);
+    }
+  }
+  s += tufos.map(([cx, cy, r]) => `<ellipse cx="${cx}" cy="${cy}" rx="${r * 1.25}" ry="${r * 0.75}" fill="${cor}"/>`).join('');
+  s += tufos.filter((_, i) => i % 2 === 0).map(([cx, cy, r]) => `<ellipse cx="${cx - r * 0.2}" cy="${cy - r * 0.3}" rx="${r * 0.7}" ry="${r * 0.35}" fill="${corL}"/>`).join('');
+  return s + '</g>';
+}
+function morros() {
+  const h1 = ridge(760, [[1, 30, 0.5, false], [2, 35, 1.9, false], [3, 22, 0.1, false], [5, 10, 2.5, false]]);
+  const h2 = ridge(830, [[1, 25, 2.5, false], [2, 30, 0.6, false], [4, 18, 1.2, false], [6, 8, 0.2, false]]);
+  let s = `<path d="${area(h1)}" fill="#86C06A"/><path d="${line(h1.map(([x, y]) => [x, y + 3]))}" stroke="#A6D68A" stroke-width="6" fill="none"/>`;
+  // araucarias distantes (menores, mais claras)
+  const far = [60, 170, 260, 420, 560, 640, 900, 1010, 1180, 1290, 1450, 1520, 1700, 1820];
+  far.forEach((x, i) => { s += araucaria(x, yAt(h1, x) + 10, 120 + (i * 37 % 60), '#4E8F5C', '#6AAA70', '#5B4A3A'); });
+  s += `<path d="${area(h2)}" fill="#6FAE58"/><path d="${line(h2.map(([x, y]) => [x, y + 3]))}" stroke="#93CB77" stroke-width="6" fill="none"/>`;
+  const near = [120, 330, 760, 1100, 1380, 1640, 1860];
+  near.forEach((x, i) => { s += araucaria(x, yAt(h2, x) + 14, 190 + (i * 53 % 80), '#2F6E46', '#4B8C5B', '#4A3A2C'); });
+  return s;
+}
+
+// ---------- JARDIM BOTANICO (estufa + jardim frances) ----------
+function estufa(cx, base) {
+  const OL = '#3D6E8E', VID = '#BFE6F3', VIDS = '#9FD3E8', FR = '#FFFFFF';
+  const panes = (x, y, w, h, nx, ny) => {
+    let s = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${VID}"/>`;
+    s += `<rect x="${x}" y="${y}" width="${w}" height="${h * 0.45}" fill="${VIDS}" opacity=".6"/>`;
+    for (let i = 1; i < nx; i++) s += `<line x1="${x + w * i / nx}" y1="${y}" x2="${x + w * i / nx}" y2="${y + h}" stroke="${FR}" stroke-width="4"/>`;
+    for (let j = 1; j < ny; j++) s += `<line x1="${x}" y1="${y + h * j / ny}" x2="${x + w}" y2="${y + h * j / ny}" stroke="${FR}" stroke-width="4"/>`;
+    return s + `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="${OL}" stroke-width="4"/>`;
+  };
+  const dome = (x, y, w, h, ribs) => { // cupula ogival
+    const d = `M ${x - w / 2},${y} C ${x - w / 2},${y - h * 0.75} ${x - w * 0.12},${y - h * 0.95} ${x},${y - h} C ${x + w * 0.12},${y - h * 0.95} ${x + w / 2},${y - h * 0.75} ${x + w / 2},${y} Z`;
+    let s = `<path d="${d}" fill="${VID}"/><path d="${d}" fill="${VIDS}" opacity=".5" transform="translate(${x * 0.12},0) scale(0.88,1)"/>`;
+    for (let i = 1; i < ribs; i++) {
+      const t = i / ribs, xb = x - w / 2 + w * t;
+      s += `<path d="M ${xb},${y} Q ${x + (xb - x) * 0.85},${y - h * 0.8} ${x},${y - h}" stroke="${FR}" stroke-width="3.5" fill="none"/>`;
+    }
+    for (const k of [0.35, 0.65]) s += `<path d="M ${x - w / 2 * Math.sqrt(1 - k * k * 0.6)},${y - h * k} Q ${x},${y - h * k - h * 0.08} ${x + w / 2 * Math.sqrt(1 - k * k * 0.6)},${y - h * k}" stroke="${FR}" stroke-width="3.5" fill="none"/>`;
+    return s + `<path d="${d}" fill="none" stroke="${OL}" stroke-width="4" stroke-linejoin="round"/>`;
+  };
+  const vault = (x, y, w, h, ribs) => { // telhado em abobada (meia elipse)
+    const d = `M ${x},${y} A ${w / 2},${h} 0 0 1 ${x + w},${y} Z`;
+    let s = `<path d="${d}" fill="${VID}"/>`;
+    for (let i = 1; i < ribs; i++) { const xx = x + w * i / ribs; const yy = y - h * Math.sqrt(1 - Math.pow((xx - x - w / 2) / (w / 2), 2));
+      s += `<line x1="${xx}" y1="${y}" x2="${xx}" y2="${yy}" stroke="${FR}" stroke-width="3.5"/>`; }
+    s += `<path d="M ${x + w * 0.08},${y - h * 0.5} A ${w * 0.43},${h * 0.5} 0 0 1 ${x + w * 0.92},${y - h * 0.5}" stroke="#E8F7FC" stroke-width="5" fill="none" opacity=".8"/>`;
+    return s + `<path d="${d}" fill="none" stroke="${OL}" stroke-width="4"/>`;
+  };
+  let s = '';
+  // sombra no chao
+  s += `<ellipse cx="${cx}" cy="${base + 6}" rx="330" ry="16" fill="#2F6B3A" opacity=".25"/>`;
+  // alas laterais
+  for (const side of [-1, 1]) {
+    const wx = side < 0 ? cx - 300 : cx + 110;
+    s += vault(wx, base - 85, 190, 55, 8);
+    s += panes(wx, base - 85, 190, 85, 6, 2);
+    // cupulas nas pontas
+    const ex = side < 0 ? wx + 4 : wx + 186;
+    s += panes(ex - 22, base - 110, 44, 110, 2, 3);
+    s += dome(ex, base - 110, 52, 60, 4);
+    s += `<line x1="${ex}" y1="${base - 170}" x2="${ex}" y2="${base - 190}" stroke="${OL}" stroke-width="4"/><circle cx="${ex}" cy="${base - 192}" r="5" fill="${FR}" stroke="${OL}" stroke-width="3"/>`;
+  }
+  // corpo central
+  s += panes(cx - 115, base - 150, 230, 150, 6, 3);
+  s += `<rect x="${cx - 125}" y="${base - 160}" width="250" height="14" fill="${FR}" stroke="${OL}" stroke-width="4" rx="3"/>`;
+  s += dome(cx, base - 160, 230, 190, 8);
+  // lanterna no topo
+  s += panes(cx - 22, base - 395, 44, 50, 2, 1);
+  s += dome(cx, base - 395, 54, 40, 4);
+  s += `<line x1="${cx}" y1="${base - 435}" x2="${cx}" y2="${base - 470}" stroke="${OL}" stroke-width="5"/><circle cx="${cx}" cy="${base - 474}" r="7" fill="${FR}" stroke="${OL}" stroke-width="3"/>`;
+  // porta
+  s += `<path d="M ${cx - 30},${base} L ${cx - 30},${base - 60} A 30,30 0 0 1 ${cx + 30},${base - 60} L ${cx + 30},${base} Z" fill="#7FC4DE" stroke="${OL}" stroke-width="4"/>`;
+  s += `<line x1="${cx}" y1="${base}" x2="${cx}" y2="${base - 90}" stroke="${FR}" stroke-width="4"/>`;
+  return s;
+}
+function jardim() {
+  const cx = 960, base = 860;
+  let s = '';
+  // gramado com faixa
+  s += `<path d="M 0,${base - 20} C 400,${base - 34} 1520,${base - 34} ${W},${base - 20} L ${W},${H} L 0,${H} Z" fill="#7CC15A"/>`;
+  s += estufa(cx, base);
+  // canteiros geometricos (jardim frances) em perspectiva
+  s += `<path d="M ${cx - 60},${base + 8} L ${cx + 60},${base + 8} L ${cx + 260},${H} L ${cx - 260},${H} Z" fill="#E9DDB8"/>`;
+  for (const side of [-1, 1]) {
+    for (let i = 0; i < 3; i++) {
+      const y0 = base + 22 + i * 52, y1 = y0 + 36;
+      const xin0 = cx + side * (78 + (y0 - base) * 0.78), xin1 = cx + side * (78 + (y1 - base) * 0.78);
+      const xout0 = xin0 + side * (180 + i * 70), xout1 = xin1 + side * (200 + i * 80);
+      s += `<path d="M ${xin0},${y0} L ${xout0},${y0} L ${xout1},${y1} L ${xin1},${y1} Z" fill="#4E9A45" stroke="#3B7E36" stroke-width="3"/>`;
+      // flores
+      for (let k = 0; k < 9 + i * 3; k++) {
+        const t = (k + 0.5) / (9 + i * 3), xx = xin0 + (xout0 - xin0) * t + (xin1 - xin0) * 0.5, yy = (y0 + y1) / 2 + ((k % 2) ? -7 : 7);
+        const cor = ['#F25C6B', '#FFD34E', '#F7F2F8', '#F28AC0'][(k + i) % 4];
+        s += `<circle cx="${xx}" cy="${yy}" r="${5 + i}" fill="${cor}"/>`;
+      }
+    }
+  }
+  // arbustos topiados
+  for (const x of [cx - 380, cx + 380, cx - 560, cx + 560]) {
+    s += `<ellipse cx="${x}" cy="${base - 8}" rx="34" ry="30" fill="#3F8A44" stroke="#2F6E37" stroke-width="3"/><ellipse cx="${x - 8}" cy="${base - 18}" rx="14" ry="8" fill="#5FA95A"/>`;
+  }
+  return s;
+}
+
+// ---------- CHAO (camada jogavel) ----------
+function chao() {
+  const g = ridge(905, [[3, 6, 0.4, false], [7, 3, 1.1, false]], 8);
+  let s = `<defs>
+    <linearGradient id="gTerra" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B9814F"/><stop offset="1" stop-color="#8E5C36"/></linearGradient>
+    <pattern id="pPedras" width="160" height="90" patternUnits="userSpaceOnUse">
+      <ellipse cx="30" cy="25" rx="16" ry="9" fill="#A06A40"/><ellipse cx="110" cy="60" rx="20" ry="11" fill="#A06A40"/>
+      <ellipse cx="80" cy="20" rx="7" ry="5" fill="#D29B66"/><ellipse cx="140" cy="18" rx="9" ry="6" fill="#7E4F2D"/>
+      <ellipse cx="50" cy="70" rx="8" ry="5" fill="#7E4F2D"/>
+    </pattern></defs>`;
+  s += `<path d="${area(g.map(([x, y]) => [x, y + 26]))}" fill="url(#gTerra)"/>`;
+  s += `<path d="${area(g.map(([x, y]) => [x, y + 26]))}" fill="url(#pPedras)"/>`;
+  // grama com tufos arredondados
+  let tufos = '';
+  for (let x = 0; x <= W; x += 24) tufos += `<circle cx="${x}" cy="${yAt(g, Math.min(x, W)) + 26}" r="15" fill="#5DAE3B"/>`;
+  s += tufos;
+  s += `<path d="${line(g)} L ${line(g.map(([x, y]) => [x, y + 30]).reverse()).slice(2)} Z" fill="#7CC74D"/>`;
+  s += `<path d="${line(g)}" stroke="#3E8A2C" stroke-width="5" fill="none"/>`;
+  s += `<path d="${line(g.map(([x, y]) => [x, y + 6]))}" stroke="#A3DC6E" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+  // folhinhas de grama
+  for (let x = 30; x < W; x += 70) { const y = yAt(g, x);
+    s += `<path d="M ${x},${y + 2} L ${x + 5},${y - 12} L ${x + 9},${y + 2} M ${x + 10},${y + 2} L ${x + 16},${y - 8} L ${x + 19},${y + 2}" fill="#3E8A2C"/>`; }
+  return s;
+}
+
+// ---------- elementos de jogo (so na previa) ----------
+function plataforma(x, y, w) {
+  return `<g>
+    <rect x="${x}" y="${y + 14}" width="${w}" height="40" rx="14" fill="#9A6538" stroke="#5E3A1E" stroke-width="5"/>
+    <rect x="${x + 10}" y="${y + 40}" width="${w - 20}" height="8" rx="4" fill="#7A4C28"/>
+    <rect x="${x - 6}" y="${y}" width="${w + 12}" height="26" rx="13" fill="#7CC74D" stroke="#3E8A2C" stroke-width="5"/>
+    <rect x="${x + 8}" y="${y + 5}" width="${w - 16}" height="6" rx="3" fill="#A3DC6E"/>
+  </g>`;
+}
+function blocoPergunta(x, y) {
+  return `<g transform="translate(${x},${y})">
+    <rect x="0" y="0" width="84" height="84" rx="14" fill="#0B3A6E" stroke="#14213D" stroke-width="5"/>
+    <rect x="7" y="7" width="70" height="70" rx="10" fill="none" stroke="#7CC6EA" stroke-width="4"/>
+    <circle cx="16" cy="16" r="4" fill="#7CC6EA"/><circle cx="68" cy="16" r="4" fill="#7CC6EA"/><circle cx="16" cy="68" r="4" fill="#7CC6EA"/><circle cx="68" cy="68" r="4" fill="#7CC6EA"/>
+    <text x="42" y="62" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-weight="bold" font-size="52" fill="#FFFFFF" stroke="#14213D" stroke-width="2">?</text>
+  </g>`;
+}
+function moeda(x, y) {
+  return `<g transform="translate(${x},${y})">
+    <ellipse cx="0" cy="0" rx="26" ry="30" fill="#E8A81E" stroke="#8A5A0B" stroke-width="4"/>
+    <ellipse cx="-3" cy="0" rx="19" ry="23" fill="#FFD34E"/>
+    <path d="M -10,13 L -2,-13 L 3,-13 L 11,13 L 6,13 L 0.5,-5 L -5,13 Z" fill="#C58A12"/>
+    <path d="M -14,4 C -4,0 6,-1 15,-6" stroke="#C58A12" stroke-width="2.5" fill="none"/>
+    <ellipse cx="-9" cy="-12" rx="5" ry="8" fill="#FFF3B8" opacity=".8"/>
+  </g>`;
+}
+function jogo() {
+  return plataforma(1180, 640, 300) + plataforma(560, 560, 220) + blocoPergunta(628, 360) +
+    moeda(625, 505) + moeda(715, 505) + moeda(1290, 585) + moeda(1370, 585) + moeda(1060, 820);
+}
+
+const L = { ceu, serra, morros, jardim, chao, jogo };
+const parts = layer === 'tudo' ? ['ceu', 'serra', 'morros', 'jardim', 'chao', 'jogo'] : [layer];
+document.getElementById('root').innerHTML =
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${parts.map(p => L[p]()).join('')}</svg>`;
+</script>
+</body>
+</html>

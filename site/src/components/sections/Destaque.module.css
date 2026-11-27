@@ -1,0 +1,129 @@
+.destaque {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  align-items: center;
+  gap: clamp(30px, 6vw, 90px);
+  padding: 110px var(--margem) 90px;
+  background: linear-gradient(135deg, var(--noite) 0%, var(--azul-2) 140%);
+  scroll-snap-align: start;
+  overflow: hidden;
+}
+
+.invertido {
+  grid-template-columns: 1fr 1.1fr;
+  background: linear-gradient(225deg, var(--noite) 0%, #2a2036 140%);
+}
+
+.invertido .tela {
+  order: 2;
+}
+
+.tela {
+  position: relative;
+}
+
+.moldura {
+  position: relative;
+  padding: 10px;
+  background: var(--noite-2);
+  border: 1px solid var(--ouro-fosco);
+  box-shadow:
+    0 40px 90px #000c,
+    0 0 0 8px #d8b56a14;
+  transform: perspective(1400px) rotateY(-6deg);
+  transition: transform 0.8s var(--curva);
+}
+
+.invertido .moldura {
+  transform: perspective(1400px) rotateY(6deg);
+}
+
+.moldura:hover {
+  transform: none;
+}
+
+.foto {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* objeto do jogo que flutua sobre o canto da tela */
+.objeto {
+  position: absolute;
+  right: -3%;
+  bottom: -9%;
+  width: clamp(70px, 11vw, 150px);
+  height: auto;
+  filter: drop-shadow(0 14px 14px #000a);
+  animation: flutuar 4.2s ease-in-out infinite;
+}
+
+.invertido .objeto {
+  right: auto;
+  left: -3%;
+}
+
+@keyframes flutuar {
+  50% {
+    transform: translateY(-18px) rotate(4deg);
+  }
+}
+
+.texto {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+}
+
+.citacao {
+  font-family: var(--fonte-titulo);
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--ouro);
+  border-left: 3px solid var(--ouro);
+  padding-left: 16px;
+}
+
+.paragrafo {
+  max-width: 560px;
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  color: var(--suave);
+}
+
+.itens {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.itens li::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 14px;
+  vertical-align: middle;
+  border: 1px solid var(--ouro);
+  transform: rotate(45deg);
+}
+
+@media (max-width: 900px) {
+  .destaque,
+  .invertido {
+    grid-template-columns: 1fr;
+    padding-top: 90px;
+  }
+
+  .invertido .tela {
+    order: 0;
+  }
+
+  .moldura,
+  .invertido .moldura {
+    transform: none;
+  }
+}

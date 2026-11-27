@@ -1,0 +1,12 @@
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+.godot/
+build/
+# ferramentas pesadas (binário do Godot, temporários); os scripts ficam
+ferramentas/godot/
+landing/
+*.avi
+*.tmp

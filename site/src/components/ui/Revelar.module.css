@@ -1,0 +1,12 @@
+.revelar {
+  opacity: 0;
+  transform: translateY(36px);
+  transition:
+    opacity 1s var(--curva),
+    transform 1s var(--curva);
+}
+
+.revelar[data-visivel="true"] {
+  opacity: 1;
+  transform: none;
+}

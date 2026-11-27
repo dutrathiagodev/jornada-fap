@@ -1,0 +1,28 @@
+.ornamento {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 22px 0;
+}
+
+.ornamento[data-alinhar="centro"] {
+  justify-content: center;
+}
+
+.linha {
+  height: 1px;
+  width: 80px;
+  background: linear-gradient(90deg, transparent, var(--ouro));
+}
+
+.linha:last-child {
+  transform: scaleX(-1);
+}
+
+.losango {
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid var(--ouro);
+  transform: rotate(45deg);
+  box-shadow: 0 0 12px #d8b56a88;
+}

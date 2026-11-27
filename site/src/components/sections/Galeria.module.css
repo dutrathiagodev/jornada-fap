@@ -1,0 +1,63 @@
+.galeria {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  padding: 110px var(--margem) 90px;
+  background: var(--noite);
+  scroll-snap-align: start;
+}
+
+.grade {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.miniatura {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  padding: 0;
+  cursor: zoom-in;
+  background: none;
+  border: 1px solid #a88b5266;
+  transition:
+    transform 0.4s var(--curva),
+    border-color 0.3s,
+    box-shadow 0.4s;
+}
+
+.miniatura:hover {
+  transform: translateY(-8px);
+  border-color: var(--ouro);
+  box-shadow: 0 24px 50px #000b;
+}
+
+.foto {
+  width: 100%;
+  height: auto;
+  transition: transform 0.8s var(--curva);
+}
+
+.miniatura:hover .foto {
+  transform: scale(1.06);
+}
+
+.legenda {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 28px 16px 12px;
+  text-align: left;
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--creme);
+  background: linear-gradient(transparent, #080b11ee);
+}

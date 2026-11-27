@@ -1,0 +1,802 @@
+<title>Documentação Jogo FAP</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: palco animado (parallax real do jogo) no topo + abas fixas; cada aba é um capítulo com blocos animados */
+:root{
+  --navy:#0B3A6E; --navy-2:#082C55; --sky:#7CC6EA; --gold:#F5B82E; --ink:#14213D;
+  --bg:#F3F7FB; --surface:#FFFFFF; --surface-2:#E8F0F8; --fg:#14213D; --muted:#566781;
+  --line:#CFDCEA; --ok:#2E9E5B; --warn:#C9791A; --bad:#C2413A; --chip:#E3EEF9;
+  --display:"Baloo 2", "Nunito", system-ui, sans-serif;
+  --body:"Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0A1626; --surface:#10223A; --surface-2:#142B47; --fg:#E7F0FA; --muted:#9DB2CB; --line:#24405F; --chip:#17345A;
+  --navy:#5B9BE0; --navy-2:#0B2140; --sky:#8ED3F2; --ink:#E7F0FA; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0A1626; --surface:#10223A; --surface-2:#142B47; --fg:#E7F0FA; --muted:#9DB2CB; --line:#24405F; --chip:#17345A;
+  --navy:#5B9BE0; --navy-2:#0B2140; --sky:#8ED3F2; --ink:#E7F0FA; color-scheme:dark }
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.6;margin:0}
+h1,h2,h3{font-family:var(--display);line-height:1.15;text-wrap:balance;margin:0}
+h2{font-size:clamp(1.6rem,3.2vw,2.3rem)}
+h3{font-size:1.2rem}
+p{margin:0}
+code,.mono{font-family:var(--mono);font-size:.88em}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.lead{font-size:1.08rem;color:var(--muted);max-width:68ch}
+
+/* palco parallax */
+.stage{position:relative;overflow:hidden;container-type:size;background:#7cc6ea;isolation:isolate}
+.stage .layer{position:absolute;inset:0;background-repeat:repeat-x;background-size:auto 100%;background-position:0 0;transition:opacity .45s ease}
+.stage.fading .layer,.stage.fading .sprite{opacity:0}
+.sprite{position:absolute;height:46cqh;aspect-ratio:1;background-repeat:no-repeat;background-size:800% 100%;
+  bottom:calc((1 - var(--g,.714)) * 100cqh - 46cqh * .035);animation:frames .62s steps(8,jump-none) infinite;transition:opacity .45s ease}
+.sprite.menina{left:52%;background-image:url(m/menina_correr.webp);animation-delay:-.2s}
+.sprite.menino{left:70%;background-image:url(m/menino_correr.webp)}
+@keyframes frames{from{background-position-x:0%}to{background-position-x:100%}}
+
+.hero{position:relative;color:#fff}
+.hero .stage{height:clamp(300px,46vw,520px)}
+.hero .stage::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,30,60,.55) 0%,rgba(8,30,60,0) 45%);z-index:2;pointer-events:none}
+.hero-copy{position:absolute;z-index:3;inset:0;display:flex;flex-direction:column;justify-content:flex-start;gap:.5rem;padding-top:clamp(18px,3.4vw,44px)}
+.hero h1{font-size:clamp(2.2rem,6.4vw,4.6rem);font-weight:800;letter-spacing:-.01em;text-shadow:0 3px 0 rgba(11,58,110,.55),0 8px 24px rgba(0,0,0,.25)}
+.hero h1 span{color:#FFD34E}
+.hero p{max-width:46ch;font-weight:700;text-shadow:0 2px 10px rgba(0,0,0,.45);font-size:clamp(.95rem,1.6vw,1.15rem)}
+.city-tag{position:absolute;z-index:3;right:max(16px,env(safe-area-inset-right,0px));bottom:14px;background:rgba(11,58,110,.85);color:#fff;border:2px solid rgba(255,255,255,.6);border-radius:999px;padding:.3rem .9rem;font-family:var(--display);font-weight:700;font-size:.95rem}
+.chips{display:flex;flex-wrap:wrap;gap:.45rem}
+.chip{display:inline-flex;align-items:center;gap:.35rem;border-radius:999px;padding:.18rem .7rem;font-size:.8rem;font-weight:800;background:var(--chip);color:var(--fg);border:1px solid var(--line)}
+.hero .chip{background:rgba(255,255,255,.92);color:#0B3A6E;border-color:transparent}
+.dot{width:.55rem;height:.55rem;border-radius:50%;display:inline-block;background:var(--muted)}
+.dot.ok{background:var(--ok)} .dot.warn{background:var(--warn)}
+
+/* abas */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--navy-2)}
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--navy-2);box-shadow:0 6px 18px rgba(8,30,60,.18)}
+.tabs .wrap{display:flex;gap:.25rem;overflow-x:auto;scrollbar-width:none;padding-block:.5rem}
+.tabs a{flex:none;text-decoration:none;color:#cfe3f7;font-family:var(--display);font-weight:700;font-size:1rem;padding:.35rem .8rem;border-radius:10px;display:flex;gap:.45rem;align-items:center}
+.tabs a .n{font-family:var(--mono);font-size:.72rem;opacity:.7}
+.tabs a:hover{background:rgba(255,255,255,.08);color:#fff}
+.tabs a[aria-current="page"]{background:#fff;color:#0B3A6E}
+.tabs a:focus-visible,button:focus-visible{outline:3px solid #FFD34E;outline-offset:2px}
+
+/* seções */
+main{padding-block:2.2rem 4rem}
+.view{display:grid;gap:2.2rem;animation:enter .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes enter{from{opacity:.2;transform:translateY(14px)}to{opacity:1;transform:none}}
+.head{display:grid;gap:.5rem}
+.grid{display:grid;gap:1rem}
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1.1rem 1.2rem;display:grid;gap:.55rem;align-content:start;min-width:0}
+.card p,.card li{color:var(--muted)}
+.card ul{margin:0;padding-left:1.1rem;display:grid;gap:.25rem}
+.k{font-family:var(--mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--navy);font-weight:600}
+.big{font-family:var(--display);font-size:2rem;font-weight:800;color:var(--navy);line-height:1}
+.note{border-left:4px solid var(--gold);background:var(--surface);border-radius:8px;padding:.8rem 1rem}
+.note.warn{border-color:var(--warn)}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+th,td{text-align:left;padding:.6rem .8rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--surface-2)}
+tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--mono)}
+pre.code{margin:0;background:#0F1E33;color:#D7E6F7;border-radius:var(--r);padding:1rem 1.1rem;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.55;min-width:0}
+pre.code .c{color:#7FA3C7} pre.code .s{color:#FFD58A} pre.code .n{color:#8ED3F2}
+
+/* metrô do fluxo */
+.metro{position:relative;display:grid;gap:.2rem;padding-left:2.6rem}
+.metro::before{content:"";position:absolute;left:1.05rem;top:.9rem;bottom:.9rem;width:6px;border-radius:6px;background:var(--line)}
+.metro::after{content:"";position:absolute;left:1.05rem;top:.9rem;width:6px;height:16%;border-radius:6px;background:linear-gradient(180deg,transparent,var(--sky),var(--navy),transparent);animation:travel 8.25s linear infinite}
+@keyframes travel{from{transform:translateY(-20%)}to{transform:translateY(560%)}}
+.st{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:.4rem 1rem;padding:.45rem 0}
+.st::before{content:"";position:absolute;left:-2.05rem;top:50%;width:1.05rem;height:1.05rem;margin-top:-.52rem;border-radius:50%;background:var(--surface);border:4px solid var(--navy);animation:lit 8.25s infinite;animation-delay:calc(var(--i) * .75s)}
+@keyframes lit{0%,8%{background:var(--gold);box-shadow:0 0 0 7px rgba(245,184,46,.28);transform:scale(1.15)}16%,100%{background:var(--surface);box-shadow:none;transform:none}}
+.st b{font-family:var(--display);font-size:1.12rem}
+.st .desc{color:var(--muted);font-size:.93rem}
+.st.fase b{color:var(--navy)}
+.branch{display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;font-weight:800;border-radius:999px;padding:.12rem .6rem;border:1px dashed var(--line);color:var(--muted)}
+.branch.red{border-color:var(--bad);color:var(--bad)}
+
+/* pista da fase */
+.track{position:relative;height:200px;border-radius:var(--r);overflow:hidden;background:linear-gradient(180deg,#9ad6f2,#dff3fb 70%);border:1px solid var(--line)}
+.track .ground{position:absolute;left:0;right:0;bottom:0;height:44px;background:linear-gradient(180deg,#7cc74d 0 12px,#9a6538 12px)}
+.runner{position:absolute;bottom:38px;height:96px;aspect-ratio:1;background:url(m/menino_correr.webp) no-repeat;background-size:800% 100%;animation:frames .55s steps(8,jump-none) infinite,run 12s linear infinite}
+@keyframes run{0%{left:1%}20%{left:19%}27%{left:19%}46%{left:44%}53%{left:44%}72%{left:69%}79%{left:69%}96%{left:86%}100%{left:86%}}
+.gate{position:absolute;bottom:44px;width:42px;height:110px;margin-left:-21px;border-radius:10px 10px 0 0;background:#0B3A6E;border:3px solid #14213D;display:grid;place-items:center;color:#fff;font-family:var(--display);font-size:1.6rem;font-weight:800;transform-origin:bottom}
+.gate.g1{left:28%;animation:open1 12s infinite} .gate.g2{left:53%;animation:open2 12s infinite} .gate.g3{left:78%;animation:open3 12s infinite}
+@keyframes open1{0%,26%{transform:none;opacity:1}29%,97%{transform:scaleY(.08);opacity:.55}100%{transform:none;opacity:1}}
+@keyframes open2{0%,52%{transform:none;opacity:1}55%,97%{transform:scaleY(.08);opacity:.55}100%{transform:none;opacity:1}}
+@keyframes open3{0%,78%{transform:none;opacity:1}81%,97%{transform:scaleY(.08);opacity:.55}100%{transform:none;opacity:1}}
+.flag{position:absolute;left:94%;bottom:44px;width:5px;height:120px;background:#14213D}
+.flag::after{content:"A";position:absolute;left:5px;top:4px;width:44px;height:30px;background:#0B3A6E;color:#fff;font-family:var(--display);font-weight:800;display:grid;place-items:center;border-radius:0 6px 6px 0;animation:wave 1.2s ease-in-out infinite;transform-origin:left}
+@keyframes wave{50%{transform:skewY(6deg) scaleX(.92)}}
+.bubble{position:absolute;bottom:158px;padding:.15rem .55rem;border-radius:10px;background:#fff;color:#0B3A6E;font-weight:800;font-size:.85rem;border:2px solid #0B3A6E;opacity:0;white-space:nowrap}
+.bubble.b1{left:15%;animation:pop1 12s infinite} .bubble.b2{left:40%;animation:pop2 12s infinite} .bubble.b3{left:65%;animation:pop3 12s infinite}
+@keyframes pop1{0%,19%{opacity:0;transform:translateY(6px)}21%,26%{opacity:1;transform:none}28%,100%{opacity:0}}
+@keyframes pop2{0%,45%{opacity:0;transform:translateY(6px)}47%,52%{opacity:1;transform:none}54%,100%{opacity:0}}
+@keyframes pop3{0%,71%{opacity:0;transform:translateY(6px)}73%,78%{opacity:1;transform:none}80%,100%{opacity:0}}
+.track-labels{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:.6rem}
+.track-labels div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:.55rem .75rem;font-size:.9rem;color:var(--muted)}
+.track-labels b{display:block;color:var(--fg);font-family:var(--display);font-size:1rem}
+
+/* pergunta */
+.qmock{background:#0B3A6E;color:#fff;border-radius:18px;padding:1.2rem;display:grid;gap:.8rem;border:4px solid #14213D;box-shadow:0 10px 0 rgba(20,33,61,.25);align-content:start}
+.qmock .top{display:flex;justify-content:space-between;align-items:center;gap:1rem;font-family:var(--mono);font-size:.78rem;color:#bfe0f5}
+.timer{flex:1;height:8px;border-radius:8px;background:rgba(255,255,255,.2);overflow:hidden}
+.timer i{display:block;height:100%;background:#FFD34E;animation:timer 7s linear infinite;transform-origin:left}
+@keyframes timer{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+.qmock h3{font-size:1.3rem}
+.alts{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
+.alts span{background:#fff;color:#0B3A6E;border-radius:10px;padding:.5rem .7rem;font-weight:800;border:3px solid transparent}
+.alts span.right{animation:right 7s infinite}
+@keyframes right{0%,55%{background:#fff;border-color:transparent}62%,100%{background:#DFF5E6;border-color:#2E9E5B}}
+.qmock .exp{background:rgba(255,255,255,.12);border-radius:10px;padding:.5rem .7rem;font-size:.92rem;animation:exp 7s infinite}
+@keyframes exp{0%,60%{opacity:.15;transform:translateY(6px)}68%,100%{opacity:1;transform:none}}
+.steps{display:grid;gap:.6rem;counter-reset:s}
+.steps div{display:grid;grid-template-columns:2.2rem 1fr;gap:.7rem;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:.65rem .8rem;color:var(--fg);animation:stepglow 8s infinite;animation-delay:calc(var(--i) * 1.6s)}
+.steps div::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:2.2rem;height:2.2rem;border-radius:50%;background:#0B3A6E;color:#fff;font-family:var(--display);font-weight:800}
+@keyframes stepglow{0%,18%{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,184,46,.25)}26%,100%{border-color:var(--line);box-shadow:none}}
+
+/* mecânicas */
+.keys{display:flex;flex-wrap:wrap;gap:.35rem}
+kbd{font-family:var(--mono);font-size:.8rem;background:var(--surface-2);border:1px solid var(--line);border-bottom-width:3px;border-radius:7px;padding:.1rem .45rem;color:var(--fg)}
+.jump svg{width:100%;height:auto;display:block;color:var(--fg)}
+.jump .arc{fill:none;stroke:var(--navy);stroke-width:3;stroke-dasharray:6 7;animation:dash 1.2s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-26}}
+.bar{height:10px;border-radius:6px;background:var(--surface-2);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--sky),var(--navy));border-radius:6px;transform-origin:left;animation:grow 1.2s cubic-bezier(.2,.8,.2,1) both}
+@keyframes grow{from{transform:scaleX(0)}}
+.row{display:flex;justify-content:space-between;gap:1rem}
+.stars{color:var(--gold);letter-spacing:.1em;font-size:1.1rem}
+.enemy{grid-template-columns:64px 1fr;align-items:center}
+.enemy .ic{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.4rem;color:#fff;animation:bob 2.4s ease-in-out infinite}
+.ic.pre{background:#8B6BB8} .ic.dis{background:#E06A4F;animation-delay:-.6s} .ic.duv{background:#5A8FC9;animation-delay:-1.2s}
+@keyframes bob{50%{transform:translateY(-6px) rotate(-3deg)}}
+.hearts{color:var(--bad);font-weight:800;letter-spacing:.15em}
+
+/* fases */
+.citybar{display:flex;flex-wrap:wrap;gap:.45rem}
+.citybar button{font-family:var(--display);font-weight:700;font-size:1rem;border:2px solid var(--line);background:var(--surface);color:var(--fg);border-radius:12px;padding:.35rem .85rem;cursor:pointer}
+.citybar button .n{font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-right:.35rem}
+.citybar button[aria-pressed="true"]{background:#0B3A6E;border-color:#0B3A6E;color:#fff}
+.citybar button[aria-pressed="true"] .n{color:#cfe3f7}
+.fase-stage{height:clamp(220px,36vw,400px);border-radius:var(--r);border:1px solid var(--line)}
+.fase-info{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:1rem}
+
+/* perguntas */
+.qcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:.8rem}
+.qc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:.85rem 1rem;display:grid;gap:.5rem;align-content:start}
+.qc .tag{font-family:var(--mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--navy)}
+.qc button{justify-self:start;font:inherit;font-weight:800;font-size:.85rem;border:0;border-radius:8px;padding:.3rem .7rem;background:var(--chip);color:var(--fg);cursor:pointer}
+.qc .ans{font-weight:800;color:var(--ok)}
+
+/* desconto */
+.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:1rem}
+.tier{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1.2rem;display:grid;gap:.4rem;position:relative;overflow:hidden}
+.tier .pct{font-family:var(--display);font-size:3rem;font-weight:800;color:var(--navy);line-height:1}
+.tier p{color:var(--muted)}
+.tier::after{content:"";position:absolute;right:-50px;bottom:-70px;width:160px;height:160px;border-radius:50%;background:var(--sky);opacity:.18;animation:breathe 4s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.15)}}
+.coupon{border:3px dashed var(--navy);border-radius:16px;padding:1rem 1.2rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between;background:var(--surface)}
+.coupon .code{font-family:var(--mono);font-size:clamp(1.1rem,3vw,1.6rem);font-weight:600;letter-spacing:.08em;color:var(--navy)}
+.check ul{padding-left:0}
+.check li{list-style:none;display:flex;gap:.5rem}
+.box{width:1.1rem;height:1.1rem;border:2px solid var(--muted);border-radius:4px;flex:none;margin-top:.25rem}
+.pill{display:inline-block;border-radius:999px;font-size:.74rem;font-weight:800;padding:.05rem .55rem;background:var(--chip);color:var(--fg);justify-self:start}
+.pill.ok{background:rgba(46,158,91,.16);color:var(--ok)} .pill.warn{background:rgba(201,121,26,.16);color:var(--warn)}
+
+/* arte */
+.sw{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:.7rem}
+.sw div{border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--surface)}
+.sw i{display:block;height:70px}
+.sw span{display:block;padding:.45rem .6rem;font-size:.85rem}
+.sw code{display:block;color:var(--muted)}
+.spritebox{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:.7rem}
+.spr{background:repeating-conic-gradient(var(--surface-2) 0 25%,var(--surface) 0 50%) 0 0/22px 22px;border:1px solid var(--line);border-radius:12px;display:grid;gap:.2rem;justify-items:center;padding:.5rem}
+.spr i{width:120px;height:120px;background-repeat:no-repeat;background-size:800% 100%;animation:frames .62s steps(8,jump-none) infinite}
+.spr i.slow{animation-duration:1s}
+.spr i.c6{background-size:600% 100%;animation:frames .6s steps(6,jump-none) infinite}
+.spr i.c4{background-size:400% 100%;animation:frames .5s steps(4,jump-none) infinite}
+.spr i.lento{animation-duration:1.6s}
+.spr span{font-size:.8rem;font-weight:800;color:var(--muted)}
+.explode{perspective:1100px;min-height:clamp(240px,34vw,360px);display:grid;place-items:center;overflow:hidden;border-radius:var(--r);background:var(--surface-2);border:1px solid var(--line)}
+.ex{position:relative;width:min(80%,520px);aspect-ratio:16/9;transform-style:preserve-3d;animation:tilt 9s ease-in-out infinite}
+.ex .lay{position:absolute;inset:0;background-size:auto 100%;background-repeat:repeat-x;border-radius:6px}
+.ex .l1{background-image:url(m/curitiba_1_fundo.webp);animation:z1 9s ease-in-out infinite}
+.ex .l2{background-image:url(m/curitiba_2_meio.webp);animation:z2 9s ease-in-out infinite}
+.ex .l3{background-image:url(m/curitiba_3_frente.webp);animation:z3 9s ease-in-out infinite}
+.ex .lab{position:absolute;left:4px;font-family:var(--mono);font-size:.72rem;font-weight:600;color:#14213D;background:#fff;border-radius:6px;padding:.1rem .4rem;white-space:nowrap;opacity:0;animation:labs 9s ease-in-out infinite}
+.ex .l1 .lab{top:6%} .ex .l2 .lab{top:40%} .ex .l3 .lab{top:78%}
+@keyframes tilt{0%,15%,90%,100%{transform:none}40%,70%{transform:rotateX(18deg) rotateY(-34deg) scale(.82)}}
+@keyframes z1{0%,15%,90%,100%{transform:none}40%,70%{transform:translateZ(-150px)}}
+@keyframes z2{0%,15%,90%,100%{transform:none}40%,70%{transform:translateZ(0)}}
+@keyframes z3{0%,15%,90%,100%{transform:none}40%,70%{transform:translateZ(150px)}}
+@keyframes labs{0%,30%,80%,100%{opacity:0}42%,68%{opacity:1}}
+.pipe{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:.7rem}
+.pipe div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:.75rem .85rem;display:grid;gap:.3rem;align-content:start;animation:stepglow 10s infinite;animation-delay:calc(var(--i) * 2s)}
+.pipe b{font-family:var(--display);font-size:1.02rem}
+.pipe span{font-size:.88rem;color:var(--muted)}
+
+/* godot */
+.tree{font-family:var(--mono);font-size:.84rem;line-height:1.7;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1rem 1.1rem;overflow-x:auto;white-space:pre;color:var(--fg);min-width:0}
+.tree .t{color:var(--navy);font-weight:600} .tree .m{color:var(--muted)}
+.sig{display:grid;gap:.5rem}
+.sig div{display:grid;grid-template-columns:minmax(0,1fr) 44px minmax(0,1fr);gap:.6rem;align-items:center;background:var(--surface-2);border-radius:10px;padding:.55rem .75rem;font-size:.88rem}
+.sig code{overflow-wrap:anywhere}
+.sig span{color:var(--muted)}
+.sig .arrow{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--line) 0 40%,var(--gold) 40% 60%,var(--line) 60%);background-size:200% 100%;animation:flow 1.4s linear infinite}
+@keyframes flow{from{background-position:100% 0}to{background-position:-100% 0}}
+
+/* roteiro */
+.prog{display:grid;gap:.4rem}
+.prog .bar{height:14px}
+.road{display:grid;gap:.8rem}
+.et{display:grid;grid-template-columns:3rem 1fr;gap:.9rem;align-items:start}
+.et .num{width:3rem;height:3rem;border-radius:14px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.3rem;background:var(--surface);border:3px solid var(--line);color:var(--muted)}
+.et.done .num{background:var(--ok);border-color:var(--ok);color:#fff}
+.et.next .num{border-color:var(--navy);color:var(--navy);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(46,111,181,.18)}}
+.et ul{columns:2 220px;column-gap:1.4rem;display:block}
+.et li{break-inside:avoid;margin-bottom:.2rem}
+
+footer{border-top:1px solid var(--line);padding-block:1.4rem;color:var(--muted);font-size:.88rem}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:0s!important;animation-iteration-count:1!important;transition:none!important}
+  .metro::after{display:none}
+}
+</style>
+
+<header class="hero">
+  <div class="stage" id="hero-stage">
+    <div class="layer"></div><div class="layer"></div><div class="layer"></div>
+    <div class="sprite menina" aria-hidden="true"></div><div class="sprite menino" aria-hidden="true"></div>
+  </div>
+  <div class="hero-copy wrap">
+    <div class="chips"><span class="chip"><i class="dot ok"></i>Arte base pronta</span><span class="chip"><i class="dot warn"></i>Godot: a montar</span><span class="chip">Godot 4.7.2</span></div>
+    <h1>Jogo <span>FAP</span></h1>
+    <p>Plataforma 2D da Faculdade Adventista do Paraná: atravesse 5 cidades, responda perguntas de estudo e da Bíblia e ganhe desconto.</p>
+  </div>
+  <div class="city-tag" id="hero-city">Fase 1 · Curitiba</div>
+</header>
+
+<nav class="tabs" aria-label="Capítulos da documentação">
+  <div class="wrap" id="tabs">
+    <a href="#visao"><span class="n">1</span>Visão</a>
+    <a href="#fluxo"><span class="n">2</span>Fluxo</a>
+    <a href="#mecanicas"><span class="n">3</span>Mecânicas</a>
+    <a href="#fases"><span class="n">4</span>Fases</a>
+    <a href="#perguntas"><span class="n">5</span>Perguntas</a>
+    <a href="#desconto"><span class="n">6</span>Desconto</a>
+    <a href="#arte"><span class="n">7</span>Arte</a>
+    <a href="#godot"><span class="n">8</span>Godot</a>
+    <a href="#roteiro"><span class="n">9</span>Roteiro</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<section class="view" id="v-visao">
+  <div class="head">
+    <span class="eyebrow">Capítulo 1 · Visão geral</span>
+    <h2>Estudo e fé numa corrida pelo Sul</h2>
+    <p class="lead">Dois estudantes da rede adventista, de uniforme, viajam por 5 cidades. Em cada uma correm, pulam, pegam moedas e respondem perguntas para abrir o caminho. Quem termina ganha um cupom de desconto na FAP.</p>
+  </div>
+  <div class="grid g3">
+    <div class="card"><span class="k">Para a FAP</span><h3>Divulgar e captar</h3><p>Uma forma divertida de apresentar a faculdade e reunir interessados no vestibular.</p></div>
+    <div class="card"><span class="k">Para o jogador</span><h3>10 a 15 minutos</h3><p>Diversão rápida, testa o que sabe e termina com um desconto de verdade.</p></div>
+    <div class="card"><span class="k">Para o trabalho</span><h3>Projeto completo</h3><p>Design, arte, programação e documentação, tudo com ferramentas gratuitas.</p></div>
+  </div>
+  <div class="grid g2">
+    <div class="card"><span class="k">Entra na 1ª versão</span>
+      <ul><li>2 personagens jogáveis (menino e menina)</li><li>5 fases: Curitiba, Foz, São Paulo, Florianópolis, Porto Alegre</li><li>Andar, correr, pular, moedas, blocos "?" e inimigos simples</li><li>Perguntas de múltipla escolha (estudo e Bíblia)</li><li>Resultado com estrelas e código de desconto</li><li>Versão Web (link) e Android</li></ul></div>
+    <div class="card"><span class="k">Fica para depois</span>
+      <ul><li>Ranking online e contas de usuário</li><li>Música e sons originais</li><li>Mais cidades</li><li>Modo para 2 jogadores</li></ul>
+      <span class="k">Valores do jogo</span>
+      <ul><li>Linguagem positiva, sem violência: os inimigos são maus hábitos</li><li>Identidade da Educação Adventista: azul-marinho, azul-claro e branco</li></ul></div>
+  </div>
+  <div class="grid g3">
+    <div class="card"><span class="k">Público principal</span><div class="big">15–18 anos</div><p>Ensino médio, principalmente da rede adventista. Depois: pais e comunidade.</p></div>
+    <div class="card"><span class="k">Plataformas</span><div class="chips"><span class="chip"><i class="dot ok"></i>Web · alta</span><span class="chip"><i class="dot ok"></i>Android · alta</span><span class="chip"><i class="dot"></i>PC · média</span></div><p>Web primeiro, porque basta um link para divulgar.</p></div>
+    <div class="card"><span class="k">Referências</span><p><b>Visual:</b> cartoon pintado à mão, parallax em camadas (Rayman Legends).</p><p><b>Jogo:</b> Super Mario World.</p></div>
+  </div>
+</section>
+
+<section class="view" id="v-fluxo" hidden>
+  <div class="head">
+    <span class="eyebrow">Capítulo 2 · Fluxo do jogo</span>
+    <h2>Da abertura ao cupom</h2>
+    <p class="lead">As fases abrem em ordem. O progresso fica salvo no aparelho e o cupom só aparece depois da Fase 5.</p>
+  </div>
+  <div class="grid g2">
+    <div class="card">
+      <span class="k">Fluxo de telas</span>
+      <div class="metro">
+        <div class="st" style="--i:0"><b>Abertura</b><span class="desc">logo FAP e Educação Adventista</span></div>
+        <div class="st" style="--i:1"><b>Menu principal</b><span class="branch">↳ Como jogar</span><span class="branch">↳ Créditos</span></div>
+        <div class="st" style="--i:2"><b>Escolha do personagem</b><span class="desc">menino ou menina</span></div>
+        <div class="st" style="--i:3"><b>Mapa da viagem</b><span class="desc">5 cidades em sequência</span></div>
+        <div class="st fase" style="--i:4"><b>Fase 1 · Curitiba</b></div>
+        <div class="st fase" style="--i:5"><b>Fase 2 · Foz do Iguaçu</b></div>
+        <div class="st fase" style="--i:6"><b>Fase 3 · São Paulo</b></div>
+        <div class="st fase" style="--i:7"><b>Fase 4 · Florianópolis</b></div>
+        <div class="st fase" style="--i:8"><b>Fase 5 · Porto Alegre</b><span class="desc">desafio final</span></div>
+        <div class="st" style="--i:9"><b>Resultado</b><span class="desc">pontos e estrelas</span></div>
+        <div class="st" style="--i:10"><b>Cupom de desconto</b><span class="desc">código e como usar</span></div>
+      </div>
+      <span class="branch red">Em qualquer fase: sem corações → Fim de jogo → repetir a fase ou menu</span>
+    </div>
+    <div class="grid" style="align-content:start">
+      <div class="card"><span class="k">Regras do fluxo</span>
+        <ul><li>Fases liberadas em ordem: só entra na próxima quem passou a anterior.</li><li>Botão <b>Pausar</b> dentro das fases: continuar, reiniciar ou voltar ao mapa.</li><li>Quem para antes da Fase 5 vê quanto faltou para o cupom.</li></ul></div>
+      <div class="card"><span class="k">O que o jogo guarda</span>
+        <div class="tbl"><table><tbody>
+          <tr><td>Personagem escolhido</td><td>memória da partida</td></tr>
+          <tr><td>Fases liberadas e estrelas</td><td><code>user://progresso.save</code></td></tr>
+          <tr><td>Pontos, moedas, acertos</td><td>memória da partida</td></tr>
+          <tr><td>Perguntas já usadas</td><td>memória da partida</td></tr>
+          <tr><td>Cupom gerado</td><td>arquivo local</td></tr>
+        </tbody></table></div></div>
+    </div>
+  </div>
+
+  <div class="head"><span class="eyebrow">Dentro de uma fase</span><h3>3 portas-pergunta até a bandeira</h3></div>
+  <div class="track" role="img" aria-label="Animação: o personagem corre, para em 3 portas com pergunta e chega à bandeira">
+    <div class="ground"></div>
+    <div class="gate g1">?</div><div class="gate g2">?</div><div class="gate g3">?</div>
+    <div class="bubble b1">Pergunta 1</div><div class="bubble b2">Pergunta 2</div><div class="bubble b3">Pergunta 3</div>
+    <div class="flag"></div>
+    <div class="runner"></div>
+  </div>
+  <div class="track-labels">
+    <div><b>Trechos</b>correr, pular e pegar moedas</div>
+    <div><b>Porta-pergunta</b>só abre com resposta; também é checkpoint</div>
+    <div><b>Errou?</b>perde 1 coração, vê a resposta certa e segue</div>
+    <div><b>Blocos "?"</b>perguntas bônus opcionais, valem moedas</div>
+    <div><b>Bandeira FAP</b>fim da fase e resumo com estrelas</div>
+  </div>
+
+  <div class="head"><span class="eyebrow">Uma pergunta</span><h3>Pausa, responde, aprende, segue</h3></div>
+  <div class="grid g2">
+    <div class="steps">
+      <div style="--i:0"><span>Encosta na porta ou bate no bloco "?". A fase pausa.</span></div>
+      <div style="--i:1"><span>O jogo sorteia uma pergunta do tema da cidade, sem repetir na partida.</span></div>
+      <div style="--i:2"><span>4 alternativas embaralhadas e 20 segundos para responder.</span></div>
+      <div style="--i:3"><span>Acertou: pontos e uma curiosidade ou versículo. Errou: mostra a certa, com explicação, e tira 1 coração.</span></div>
+      <div style="--i:4"><span>A fase volta com a porta aberta.</span></div>
+    </div>
+    <div class="qmock" role="img" aria-label="Exemplo da janela de pergunta">
+      <div class="top"><span>FASE 4 · BÍBLIA</span><span class="timer"><i></i></span><span>20s</span></div>
+      <h3>Quem construiu a arca a pedido de Deus?</h3>
+      <div class="alts"><span class="right">A) Noé</span><span>B) Moisés</span><span>C) Abraão</span><span>D) Davi</span></div>
+      <div class="exp">Certo! Deus pediu a Noé que construísse a arca. Gênesis 6:13-14</div>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="v-mecanicas" hidden>
+  <div class="head">
+    <span class="eyebrow">Capítulo 3 · Mecânicas</span>
+    <h2>Correr, pular, responder</h2>
+    <p class="lead">Os valores abaixo são o ponto de partida. Ficam em variáveis do script do jogador e vão ser ajustados nos testes.</p>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>Ação</th><th>Teclado</th><th>Controle</th><th>Celular</th><th>Nome no Godot</th></tr></thead>
+    <tbody>
+      <tr><td>Andar</td><td><span class="keys"><kbd>←</kbd><kbd>→</kbd><kbd>A</kbd><kbd>D</kbd></span></td><td>analógico</td><td>setas à esquerda</td><td><code>mover_esquerda</code> / <code>mover_direita</code></td></tr>
+      <tr><td>Correr</td><td><kbd>Shift</kbd></td><td>X</td><td>automático ao segurar</td><td><code>correr</code></td></tr>
+      <tr><td>Pular</td><td><span class="keys"><kbd>Espaço</kbd><kbd>W</kbd><kbd>↑</kbd></span></td><td>A</td><td>botão Pular</td><td><code>pular</code></td></tr>
+      <tr><td>Responder</td><td><span class="keys"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd></span></td><td>direcional + A</td><td>toque</td><td>—</td></tr>
+      <tr><td>Pausar</td><td><span class="keys"><kbd>Esc</kbd><kbd>P</kbd></span></td><td>Start</td><td>botão ‖</td><td><code>pausar</code></td></tr>
+    </tbody></table></div>
+
+  <div class="grid g2">
+    <div class="card jump"><span class="k">O pulo</span>
+      <svg viewBox="0 0 420 200" role="img" aria-label="Arco do pulo, com cerca de 260 pixels de altura">
+        <line x1="10" y1="170" x2="410" y2="170" stroke="currentColor" stroke-opacity=".25" stroke-width="2"/>
+        <path id="arc" class="arc" d="M40,170 Q210,-70 380,170"/>
+        <line x1="210" y1="50" x2="210" y2="170" stroke="#F5B82E" stroke-width="2" stroke-dasharray="4 5"/>
+        <text x="218" y="112" fill="currentColor" font-family="JetBrains Mono, monospace" font-size="12">~260 px</text>
+        <text x="20" y="192" fill="currentColor" fill-opacity=".7" font-family="JetBrains Mono, monospace" font-size="11">coyote 0,1 s</text>
+        <text x="300" y="192" fill="currentColor" fill-opacity=".7" font-family="JetBrains Mono, monospace" font-size="11">buffer 0,12 s</text>
+        <circle r="12" fill="#0B3A6E" stroke="#fff" stroke-width="3"><animateMotion dur="1.6s" repeatCount="indefinite" calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines=".3 .1 .7 .9"><mpath href="#arc"/></animateMotion></circle>
+      </svg>
+      <p>Solte o botão cedo para um pulo curto. Caindo, a gravidade aumenta 40% para o pulo não parecer flutuar.</p>
+    </div>
+    <div class="card"><span class="k">Movimento</span>
+      <div class="grid" style="gap:.65rem">
+        <div><div class="row"><span>Andando</span><span class="mono">320 px/s</span></div><div class="bar"><i style="width:62%"></i></div></div>
+        <div><div class="row"><span>Correndo</span><span class="mono">520 px/s</span></div><div class="bar"><i style="width:100%"></i></div></div>
+        <div><div class="row"><span>Gravidade</span><span class="mono">2400 px/s²</span></div><div class="bar"><i style="width:80%"></i></div></div>
+        <div><div class="row"><span>Aceleração / freio</span><span class="mono">2200 / 2600</span></div><div class="bar"><i style="width:73%"></i></div></div>
+      </div>
+      <span class="k">Vidas</span>
+      <p><span class="hearts">♥♥♥</span> por fase. Perde 1 ao encostar num inimigo, errar uma pergunta ou cair num buraco. Depois do dano, 1,5 s piscando, sem levar outro.</p>
+    </div>
+  </div>
+
+  <div class="grid g3">
+    <div class="card enemy"><div class="ic pre">Zz</div><div><h3>Preguiça</h3><p>Anda devagar de um lado para o outro. Pular em cima.</p></div></div>
+    <div class="card enemy"><div class="ic dis">▯</div><div><h3>Distração</h3><p>Celular com asinhas que voa em onda. Pular em cima.</p></div></div>
+    <div class="card enemy"><div class="ic duv">?</div><div><h3>Dúvida</h3><p>Aparece e some. Só vai embora com a próxima resposta certa.</p></div></div>
+  </div>
+
+  <div class="grid g2">
+    <div class="tbl"><table>
+      <thead><tr><th>Objeto</th><th>Como funciona</th><th>Pontos</th></tr></thead>
+      <tbody>
+        <tr><td>Moeda "A"</td><td>encostar para pegar</td><td class="num">+10</td></tr>
+        <tr><td>Livro</td><td>raro, dá 1 coração (máx. 3)</td><td class="num">+50</td></tr>
+        <tr><td>Bloco "?"</td><td>bater por baixo, pergunta bônus</td><td class="num">+100</td></tr>
+        <tr><td>Porta-pergunta</td><td>obrigatória, abre com resposta</td><td class="num">+200</td></tr>
+        <tr><td>Inimigo</td><td>pular em cima</td><td class="num">+50</td></tr>
+        <tr><td>Bandeira FAP</td><td>fim da fase</td><td class="num">+500</td></tr>
+      </tbody></table></div>
+    <div class="card"><span class="k">Estrelas por fase</span>
+      <p><span class="stars">★☆☆</span> terminou a fase</p>
+      <p><span class="stars">★★☆</span> acertou pelo menos 2 das 3 portas</p>
+      <p><span class="stars">★★★</span> acertou as 3 e pegou 80% das moedas</p>
+      <p>O total (máximo 15) define a faixa de desconto. Pontos da fase = moedas + acertos + bônus de tempo + corações × 100.</p></div>
+  </div>
+</section>
+
+<section class="view" id="v-fases" hidden>
+  <div class="head">
+    <span class="eyebrow">Capítulo 4 · Fases</span>
+    <h2>Cinco cidades, dificuldade crescente</h2>
+    <p class="lead">Cada fase dura de 2 a 3 minutos e tem 3 portas-pergunta. Escolha uma cidade para ver o cenário em movimento.</p>
+  </div>
+  <div class="citybar" id="citybar" role="group" aria-label="Escolher cidade"></div>
+  <div class="stage fase-stage" id="fase-stage">
+    <div class="layer"></div><div class="layer"></div><div class="layer"></div>
+    <div class="sprite menina" aria-hidden="true"></div><div class="sprite menino" aria-hidden="true"></div>
+  </div>
+  <div class="fase-info" id="fase-info"></div>
+  <div class="card"><span class="k">Como toda fase é montada</span>
+    <ul><li>3 camadas <code>Parallax2D</code> da cidade, depois o chão e as plataformas com colisão (<code>TileMapLayer</code>).</li><li>Moedas, blocos "?" e livro são cenas reutilizáveis. Inimigos colocados à mão.</li><li>3 <code>PortaPergunta</code> com o tema da cidade, a <code>BandeiraFim</code> e os limites da câmera na largura da fase (8 000 a 12 000 px).</li></ul></div>
+</section>
+
+<section class="view" id="v-perguntas" hidden>
+  <div class="head">
+    <span class="eyebrow">Capítulo 5 · Banco de perguntas</span>
+    <h2>60 perguntas, revisadas antes de publicar</h2>
+    <p class="lead">12 por cidade: as 3 portas, os bônus e uma reserva para não repetir. Um professor revisa as de estudo e um pastor ou capelão revisa as da Bíblia.</p>
+  </div>
+  <div class="grid g4">
+    <div class="card"><span class="k">Formato</span><div class="big">4</div><p>alternativas, 1 certa, embaralhadas a cada vez</p></div>
+    <div class="card"><span class="k">Tamanho</span><div class="big">120</div><p>caracteres no máximo na pergunta; 40 em cada alternativa</p></div>
+    <div class="card"><span class="k">Tempo</span><div class="big">20 s</div><p>para responder; dá para desligar na acessibilidade</p></div>
+    <div class="card"><span class="k">Bíblia</span><div class="big">Ref.</div><p>toda pergunta traz livro, capítulo e versículo</p></div>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>Fase</th><th>Temas</th><th>Exemplos de assunto</th></tr></thead>
+    <tbody>
+      <tr><td>Curitiba</td><td><code>portugues</code>, <code>matematica</code></td><td>ortografia, crase, frações, porcentagem</td></tr>
+      <tr><td>Foz do Iguaçu</td><td><code>ciencias</code>, <code>geografia</code></td><td>ciclo da água, biomas, estados e capitais</td></tr>
+      <tr><td>São Paulo</td><td><code>historia</code>, <code>logica</code>, <code>tecnologia</code></td><td>Brasil República, sequências, informática</td></tr>
+      <tr><td>Florianópolis</td><td><code>biblia</code></td><td>personagens, milagres, parábolas</td></tr>
+      <tr><td>Porto Alegre</td><td>todos + <code>biblia</code></td><td>mistura, nível difícil</td></tr>
+    </tbody></table></div>
+  <div class="head"><span class="eyebrow">Exemplos para revisão</span><h3>Toque em "Ver resposta"</h3></div>
+  <div class="qcards" id="qcards"></div>
+  <div class="grid g2">
+    <div class="card"><span class="k">Arquivo por fase</span><p>Um JSON em <code>jogo/dados/perguntas/&lt;cidade&gt;.json</code>. Dá para editar as perguntas sem mexer no código.</p><p>Perguntas da Bíblia têm o campo extra <code>"referencia"</code>, por exemplo <code>"Gênesis 6:13-14"</code>.</p></div>
+<pre class="code"><span class="c">// curitiba.json</span>
+{ <span class="n">"fase"</span>: <span class="s">"curitiba"</span>,
+  <span class="n">"perguntas"</span>: [{
+    <span class="n">"id"</span>: <span class="s">"cwb-001"</span>, <span class="n">"tema"</span>: <span class="s">"matematica"</span>,
+    <span class="n">"dificuldade"</span>: 1,
+    <span class="n">"pergunta"</span>: <span class="s">"Quanto é 25% de 80?"</span>,
+    <span class="n">"alternativas"</span>: [<span class="s">"20"</span>, <span class="s">"25"</span>, <span class="s">"16"</span>, <span class="s">"40"</span>],
+    <span class="n">"correta"</span>: 0,
+    <span class="n">"explicacao"</span>: <span class="s">"25% é um quarto. 80 ÷ 4 = 20."</span>
+  }] }</pre>
+  </div>
+</section>
+
+<section class="view" id="v-desconto" hidden>
+  <div class="head">
+    <span class="eyebrow">Capítulo 6 · Desconto</span>
+    <h2>O prêmio de quem termina</h2>
+  </div>
+  <div class="note warn"><b>Proposta.</b> Percentuais, validade e condições precisam ser definidos e aprovados pela FAP (financeiro ou marketing) antes de publicar.</div>
+  <div class="tiers">
+    <div class="tier"><span class="k">5 a 9 estrelas</span><div class="pct">5%</div><p>terminou as 5 fases</p></div>
+    <div class="tier"><span class="k">10 a 13 estrelas</span><div class="pct">10%</div><p>bom desempenho</p></div>
+    <div class="tier"><span class="k">14 a 15 estrelas</span><div class="pct">15%</div><p>quase perfeito</p></div>
+  </div>
+  <div class="coupon"><div><span class="k">Exemplo de código</span><div class="code" id="code">FAP-26-K7Q2-10</div></div><p style="max-width:40ch;color:var(--muted)">Um cupom por pessoa. Jogar de novo pode subir a faixa, mas não gera cupons extras.</p></div>
+  <div class="grid g2">
+    <div class="card"><span class="pill">Opção A · MVP</span><h3>Código sem servidor</h3>
+      <ul><li>No fim, o jogo pede nome e e-mail, com aceite de privacidade.</li><li>Gera <code>FAP-26-XXXX-YY</code>, com dígito verificador calculado por uma chave.</li><li>A secretaria confere o código numa planilha.</li><li><b>Limite:</b> quem souber programar pode tentar forjar códigos.</li></ul></div>
+    <div class="card"><span class="pill ok">Opção B · recomendada</span><h3>Com servidor</h3>
+      <ul><li>O jogo envia o resultado (Supabase grátis ou Planilha Google).</li><li>O servidor confere e devolve um código único.</li><li>Cada código vale uma vez só.</li><li><b>Ganho:</b> sem fraude e a FAP fica com a lista de interessados.</li></ul></div>
+  </div>
+  <div class="grid g2">
+    <div class="card"><span class="k">Privacidade (LGPD)</span>
+      <ul><li>Coletar só nome, e-mail e, se quiser, telefone e curso de interesse.</li><li>Aviso claro do uso dos dados e caixa de aceite não marcada.</li><li>Link para a política de privacidade da FAP.</li><li>Menores de 18: e-mail do responsável ou resgate presencial.</li></ul></div>
+    <div class="card check"><span class="k">Precisa da FAP</span>
+      <ul><li><i class="box"></i>Percentual de cada faixa</li><li><i class="box"></i>Onde vale: matrícula, mensalidade, curso</li><li><i class="box"></i>Validade do cupom</li><li><i class="box"></i>Opção A ou B e quem valida</li><li><i class="box"></i>Texto de privacidade aprovado</li><li><i class="box"></i>Autorização para usar logo e uniforme</li></ul></div>
+  </div>
+</section>
+
+<section class="view" id="v-arte" hidden>
+  <div class="head">
+    <span class="eyebrow">Capítulo 7 · Arte e assets</span>
+    <h2>Cartoon pintado, em camadas</h2>
+    <p class="lead">Toda a arte foi gerada no Gemini e trabalhada com scripts em Python. Os personagens ganharam esqueleto para animar; os cenários foram separados em camadas de parallax.</p>
+  </div>
+  <div class="sw">
+    <div><i style="background:#0B3A6E"></i><span>Azul-marinho<code>#0B3A6E</code></span></div>
+    <div><i style="background:#7CC6EA"></i><span>Azul-claro<code>#7CC6EA</code></span></div>
+    <div><i style="background:#F8FAFC;border-bottom:1px solid #CFDCEA"></i><span>Branco<code>#F8FAFC</code></span></div>
+    <div><i style="background:#14213D"></i><span>Contorno<code>#14213D</code></span></div>
+    <div><i style="background:#FFD34E"></i><span>Dourado<code>#FFD34E</code></span></div>
+  </div>
+  <div class="card"><span class="k">Personagens modulares · folha 3072 × 2688, quadros de 384 × 384</span>
+    <p>Cada personagem é montado com peças separadas (cabeça com 5 expressões, tronco, braço, antebraço, mãos, coxa, canela e tênis) e um esqueleto com pescoço, ombros, cotovelos, quadril, joelhos e tornozelos, como nos pacotes feitos em Spriter.</p>
+    <div class="spritebox">
+      <div class="spr"><i class="slow" style="background-image:url(m/menino_parado.webp)"></i><span>Menino · parado</span></div>
+      <div class="spr"><i style="background-image:url(m/menino_correr.webp)"></i><span>Menino · correr</span></div>
+      <div class="spr"><i class="c6" style="background-image:url(m/menino_comemorar.webp)"></i><span>Menino · comemorar</span></div>
+      <div class="spr"><i class="slow" style="background-image:url(m/menina_parado.webp)"></i><span>Menina · parado</span></div>
+      <div class="spr"><i style="background-image:url(m/menina_correr.webp)"></i><span>Menina · correr</span></div>
+      <div class="spr"><i class="c6" style="background-image:url(m/menina_comemorar.webp)"></i><span>Menina · comemorar</span></div>
+      <div class="spr"><i class="c4" style="background-image:url(m/menino_dano.webp)"></i><span>Menino · dano</span></div>
+      <div class="spr"><i class="c6 lento" style="background-image:url(m/menino_derrota.webp)"></i><span>Menino · derrota</span></div>
+      <div class="spr"><i class="c4" style="background-image:url(m/menina_dano.webp)"></i><span>Menina · dano</span></div>
+      <div class="spr"><i class="c6 lento" style="background-image:url(m/menina_derrota.webp)"></i><span>Menina · derrota</span></div>
+    </div>
+    <div class="tbl"><table>
+      <thead><tr><th>Linha</th><th>Animação</th><th>Quadros</th><th>FPS</th></tr></thead>
+      <tbody><tr><td class="num">0</td><td>parado</td><td class="num">8</td><td class="num">8</td></tr><tr><td class="num">1</td><td>correr</td><td class="num">8</td><td class="num">12–16</td></tr><tr><td class="num">2</td><td>pular</td><td class="num">2</td><td class="num">8</td></tr><tr><td class="num">3</td><td>cair</td><td class="num">2</td><td class="num">8</td></tr><tr><td class="num">4</td><td>comemorar</td><td class="num">6</td><td class="num">10</td></tr><tr><td class="num">5</td><td>dano (tonto)</td><td class="num">4</td><td class="num">10</td></tr><tr><td class="num">6</td><td>derrota</td><td class="num">6</td><td class="num">8</td></tr></tbody></table></div>
+    <p>O pé fica em y ≈ 371 no quadro. Escala sugerida no jogo: 0,65 (cerca de 170 px de altura em 1080p). Para mudar uma pose: <code>ferramentas/animar_v2.py</code>.</p>
+  </div>
+  <div class="grid g2">
+    <div class="explode" role="img" aria-label="Animação: as 3 camadas do cenário de Curitiba se separam em profundidade">
+      <div class="ex">
+        <div class="lay l1"><span class="lab">1_fundo · 0,12</span></div>
+        <div class="lay l2"><span class="lab">2_meio · 0,4</span></div>
+        <div class="lay l3"><span class="lab">3_frente · 1,0</span></div>
+      </div>
+    </div>
+    <div class="card"><span class="k">Cenários · 3 camadas de ≈ 3870 × 1080</span>
+      <p>Cada camada repete na horizontal sem emenda (imagem + cópia espelhada). O número ao lado do nome é a velocidade no <code>Parallax2D</code>.</p>
+      <div class="tbl"><table><thead><tr><th>Cidade</th><th>Topo do chão</th></tr></thead><tbody>
+        <tr><td>Curitiba</td><td class="num">771 / 1080</td></tr><tr><td>Foz do Iguaçu</td><td class="num">731 / 1080</td></tr><tr><td>São Paulo</td><td class="num">810 / 1080</td></tr><tr><td>Florianópolis</td><td class="num">778 / 1080</td></tr><tr><td>Porto Alegre</td><td class="num">777 / 1080</td></tr></tbody></table></div></div>
+  </div>
+  <div class="head"><span class="eyebrow">Como a arte é produzida</span></div>
+  <div class="pipe">
+    <div style="--i:0"><b>1 · Gemini</b><span>gera cada camada; meio e frente vêm sobre magenta #FF00FF</span></div>
+    <div style="--i:1"><b>2 · Captura</b><span>a imagem é salva como aparece na tela (1376 × 768)</span></div>
+    <div style="--i:2"><b>3 · Script</b><span><code>camadas_parallax.py</code> tira o magenta, emenda e ajusta a altura</span></div>
+    <div style="--i:3"><b>4 · PNG pronto</b><span>vai para <code>assets/cenarios/&lt;cidade&gt;/parallax/</code></span></div>
+    <div style="--i:4"><b>5 · Prévia</b><span><code>demo_parallax.py</code> gera o GIF com os personagens</span></div>
+  </div>
+  <div class="note warn"><b>Atenção no Gemini:</b> não use o botão "baixar em tamanho original" em imagens com fundo magenta. Ele refaz a imagem e inventa coisas; já misturou a ponte de Florianópolis no cenário de Curitiba.</div>
+  <div class="tbl"><table>
+    <thead><tr><th>Arte que ainda falta</th><th>Prioridade</th><th>Como fazer</th></tr></thead>
+    <tbody>
+      <tr><td>Moeda "A", bloco "?", livro, bandeira FAP</td><td><span class="pill warn">alta</span></td><td>Gemini com fundo magenta + recorte</td></tr>
+      <tr><td>Inimigos: Preguiça, Distração, Dúvida</td><td><span class="pill warn">alta</span></td><td>Gemini em peças + animação simples</td></tr>
+      <tr><td>Plataformas por cidade</td><td><span class="pill warn">alta</span></td><td>Gemini, uma por cidade</td></tr>
+      <tr><td>Interface: botões, corações, caixa de pergunta</td><td><span class="pill warn">alta</span></td><td>Desenhada no Godot</td></tr>
+      <tr><td>Tela de título e mapa da viagem</td><td><span class="pill">média</span></td><td>Gemini</td></tr>
+      <tr><td>Sons e música</td><td><span class="pill">média</span></td><td>Freesound / OpenGameArt (CC0)</td></tr>
+    </tbody></table></div>
+</section>
+
+<section class="view" id="v-godot" hidden>
+  <div class="head">
+    <span class="eyebrow">Capítulo 8 · Arquitetura no Godot</span>
+    <h2>Como o projeto vai ser montado</h2>
+  </div>
+  <div class="grid g4">
+    <div class="card"><span class="k">Versão</span><div class="big">4.7.2</div><p>já baixada em <code>ferramentas/godot/</code></p></div>
+    <div class="card"><span class="k">Renderizador</span><div class="big" style="font-size:1.4rem">Compatibility</div><p>roda na Web e em celulares simples</p></div>
+    <div class="card"><span class="k">Resolução base</span><div class="big" style="font-size:1.4rem">1920 × 1080</div><p><code>canvas_items</code>, aspecto <code>expand</code></p></div>
+    <div class="card"><span class="k">Linguagem</span><div class="big" style="font-size:1.4rem">GDScript</div><p>parecida com Python</p></div>
+  </div>
+  <div class="grid g2">
+<div class="tree"><span class="t">jogo/</span>
+├── project.godot
+├── <span class="t">autoload/</span>   <span class="m">Jogo · Progresso · Perguntas</span>
+├── <span class="t">cenas/</span>
+│   ├── telas/     <span class="m">Menu, Mapa, Resultado, Cupom…</span>
+│   ├── jogador/   <span class="m">Jogador.tscn</span>
+│   ├── fases/     <span class="m">FaseBase + 5 fases</span>
+│   ├── objetos/   <span class="m">Moeda, PortaPergunta…</span>
+│   ├── inimigos/  <span class="m">Preguica, Distracao, Duvida</span>
+│   └── ui/        <span class="m">HUD, JanelaPergunta, Pausa</span>
+├── <span class="t">dados/perguntas/</span>  <span class="m">5 arquivos .json</span>
+└── <span class="t">assets/</span>     <span class="m">arte, sons</span></div>
+<div class="tree"><span class="t">Fase</span> <span class="m">(Node2D · Fase.gd)</span>
+├── Fundo
+│   ├── CamadaFundo  <span class="m">Parallax2D 0,12</span>
+│   ├── CamadaMeio   <span class="m">Parallax2D 0,4</span>
+│   └── CamadaFrente <span class="m">Parallax2D 1,0</span>
+├── Chao      <span class="m">TileMapLayer (colisão)</span>
+├── Objetos · Inimigos
+├── <span class="t">Jogador</span>   <span class="m">CharacterBody2D</span>
+│   ├── AnimatedSprite2D
+│   ├── CollisionShape2D
+│   └── Camera2D
+├── BandeiraFim
+└── UI        <span class="m">CanvasLayer: HUD + pergunta</span></div>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>Autoload</th><th>Responsabilidade</th><th>Funções</th></tr></thead>
+    <tbody>
+      <tr><td><code>Jogo</code></td><td>estado da partida</td><td><code>iniciar_partida()</code> <code>adicionar_pontos()</code> <code>perder_vida()</code> <code>concluir_fase()</code></td></tr>
+      <tr><td><code>Progresso</code></td><td>salvar no aparelho</td><td><code>salvar()</code> <code>carregar()</code> <code>fase_liberada()</code> <code>estrelas_total()</code></td></tr>
+      <tr><td><code>Perguntas</code></td><td>banco de perguntas</td><td><code>carregar(fase)</code> <code>sortear(tema)</code> <code>marcar_usada(id)</code></td></tr>
+    </tbody></table></div>
+  <div class="card"><span class="k">Sinais entre as cenas</span>
+    <div class="sig">
+      <div><code>PortaPergunta.pergunta_pedida</code><i class="arrow"></i><span>abre a JanelaPergunta e pausa a fase</span></div>
+      <div><code>JanelaPergunta.respondida</code><i class="arrow"></i><span>abre a porta; soma pontos ou tira vida</span></div>
+      <div><code>Jogador.morreu</code><i class="arrow"></i><span>volta ao checkpoint ou Fim de jogo</span></div>
+      <div><code>BandeiraFim.alcancada</code><i class="arrow"></i><span>resumo da fase e volta ao Mapa</span></div>
+    </div></div>
+  <div class="grid g2">
+    <div class="card"><span class="k">Asset Library (grátis)</span>
+      <ul><li><b>Parallax:</b> nó nativo <code>Parallax2D</code>, sem plugin.</li><li><b>Controle do personagem:</b> Ultimate Platformer Controller 2D (MIT), como referência.</li><li><b>Diálogos:</b> Dialogue Manager 3 (MIT), opcional. A janela de pergunta é simples de fazer à mão.</li></ul></div>
+    <div class="card"><span class="k">Exportação</span>
+      <ul><li><b>Web:</b> instalar os Export Templates 4.7.2, exportar HTML5 e publicar no itch.io ou GitHub Pages.</li><li><b>Android:</b> Android SDK e chave de assinatura.</li><li><b>Peso:</b> importar as camadas como WebP (qualidade ~85).</li></ul></div>
+  </div>
+</section>
+
+<section class="view" id="v-roteiro" hidden>
+  <div class="head">
+    <span class="eyebrow">Capítulo 9 · Roteiro</span>
+    <h2>Oito etapas até publicar</h2>
+  </div>
+  <div class="prog"><div class="row"><span><b>1 de 8</b> etapas concluídas</span><span class="mono">12%</span></div><div class="bar"><i style="width:12.5%"></i></div></div>
+  <div class="road">
+    <div class="et done"><div class="num">0</div><div class="card"><h3>Arte base <span class="pill ok">concluída 26/11</span></h3><ul><li>Godot baixado</li><li>Personagens modulares com 7 animações</li><li>5 cenários em parallax</li><li>Documentação</li></ul></div></div>
+    <div class="et next"><div class="num">1</div><div class="card"><h3>Projeto Godot e jogador <span class="pill">próxima</span></h3><ul><li>Criar <code>jogo/</code> (Compatibility, 1920×1080)</li><li>Copiar a arte</li><li><code>Jogador.tscn</code> com animações</li><li>Input Map</li></ul><p><b>Pronto quando:</b> o personagem anda, corre e pula num chão de teste.</p></div></div>
+    <div class="et"><div class="num">2</div><div class="card"><h3>Fase 1 jogável</h3><ul><li>FaseBase com Parallax2D</li><li>Chão e plataformas</li><li>Moedas, bloco "?", checkpoint, bandeira</li><li>Preguiça e HUD</li></ul></div></div>
+    <div class="et"><div class="num">3</div><div class="card"><h3>Perguntas e interface</h3><ul><li>Autoload Perguntas (JSON)</li><li>JanelaPergunta com tempo</li><li>PortaPergunta ligada</li><li>12 perguntas de Curitiba</li></ul></div></div>
+    <div class="et"><div class="num">4</div><div class="card"><h3>Telas e fluxo completo</h3><ul><li>Abertura, Menu, Personagem, Mapa</li><li>Pausa, Fim de jogo, Resultado, Créditos</li><li>Salvar e carregar progresso</li></ul></div></div>
+    <div class="et"><div class="num">5</div><div class="card"><h3>Fases 2 a 5</h3><ul><li>Arte que falta</li><li>Montar as 4 fases</li><li>48 perguntas restantes</li><li>Ponte do Conhecimento</li></ul></div></div>
+    <div class="et"><div class="num">6</div><div class="card"><h3>Cupom e desconto</h3><ul><li>Decisões da FAP</li><li>Cadastro com aceite</li><li>Geração do código</li></ul></div></div>
+    <div class="et"><div class="num">7</div><div class="card"><h3>Testes e publicação</h3><ul><li>Teste com 5 a 10 estudantes</li><li>Ajuste de dificuldade</li><li>Botões de toque no celular</li><li>Publicar Web e APK</li></ul></div></div>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>Decisão pendente</th><th>Quem decide</th><th>Afeta</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Percentual e regras do desconto</td><td>FAP</td><td>Etapa 6</td><td><span class="pill warn">pendente</span></td></tr>
+      <tr><td>Cupom sem servidor (A) ou com servidor (B)</td><td>FAP + equipe</td><td>Etapa 6</td><td><span class="pill warn">pendente</span></td></tr>
+      <tr><td>Autorização de logo e uniforme</td><td>FAP / Educação Adventista</td><td>Publicação</td><td><span class="pill warn">pendente</span></td></tr>
+      <tr><td>Quem revisa as perguntas</td><td>FAP</td><td>Etapas 3 e 5</td><td><span class="pill warn">pendente</span></td></tr>
+      <tr><td>Onde publicar</td><td>FAP + equipe</td><td>Etapa 7</td><td><span class="pill warn">pendente</span></td></tr>
+      <tr><td>Prazo de entrega do trabalho</td><td>Faculdade</td><td>Todas</td><td><span class="pill warn">pendente</span></td></tr>
+    </tbody></table></div>
+  <div class="grid g4">
+    <div class="card"><span class="k">Risco</span><h3>Arte nova não combinar</h3><p>Usar sempre os mesmos termos de estilo no Gemini e comparar lado a lado.</p></div>
+    <div class="card"><span class="k">Risco</span><h3>Jogo Web pesado</h3><p>Imagens em WebP e camadas de fundo reduzidas.</p></div>
+    <div class="card"><span class="k">Risco</span><h3>Pergunta com erro</h3><p>Revisão obrigatória antes de publicar.</p></div>
+    <div class="card"><span class="k">Risco</span><h3>Cupom fraudado</h3><p>Opção B, com servidor, para uso real.</p></div>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap">Documentação do Jogo FAP · 26/11/2026 · arquivos-fonte em <code>JOGO-FAP/docs/</code></div></footer>
+
+<script>
+(function(){
+  var CIDADES = [
+    {id:"curitiba", nome:"Curitiba", n:1, g:771, tema:"Português e Matemática", dif:1, novo:"Tutorial: andar, pular, moeda e o 1º bloco \"?\"", ini:"Preguiça", cena:"Serra do Mar, araucárias e a Estufa do Jardim Botânico", cur:"A araucária é a árvore-símbolo do Paraná."},
+    {id:"foz", nome:"Foz do Iguaçu", n:2, g:731, tema:"Ciências e Geografia", dif:2, novo:"Troncos que se movem e buracos com água", ini:"Preguiça e Distração", cena:"Cataratas com arco-íris, mata atlântica, tucanos e quatis", cur:"As Cataratas têm cerca de 275 quedas d'água."},
+    {id:"sao_paulo", nome:"São Paulo", n:3, g:810, tema:"História, Lógica e Tecnologia", dif:2, novo:"Pular entre toldos e telhados; correr fica importante", ini:"Distração (mais rápida)", cena:"Skyline com Copan e Edifício Itália, MASP, ipês e calçada de ondas", cur:"O MASP tem um vão livre de 74 m sob o prédio."},
+    {id:"florianopolis", nome:"Florianópolis", n:4, g:778, tema:"Bíblia: personagens e histórias", dif:3, novo:"Areia escorrega um pouco e dunas em rampa", ini:"Dúvida e Preguiça", cena:"Mar turquesa, Ponte Hercílio Luz, casinhas açorianas e coqueiros", cur:"A Ponte Hercílio Luz foi inaugurada em 1926."},
+    {id:"porto_alegre", nome:"Porto Alegre", n:5, g:777, tema:"Desafio final: estudo e Bíblia", dif:3, novo:"Ponte do Conhecimento: 3 perguntas seguidas montam a ponte até a bandeira", ini:"Todos, em menor quantidade", cena:"Pôr do sol no Guaíba, Catedral, Usina do Gasômetro e jacarandás", cur:"O pôr do sol do Guaíba é um dos cartões-postais da cidade."}
+  ];
+  var VEL = [0.12, 0.4, 1.0];
+  var reduce = false;
+  try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch(e){}
+
+  function setCity(stage, c){
+    var ls = stage.querySelectorAll(".layer");
+    ["1_fundo","2_meio","3_frente"].forEach(function(n,i){ ls[i].style.backgroundImage = "url(m/"+c.id+"_"+n+".webp)"; });
+    stage.style.setProperty("--g", (c.g/1080).toFixed(4));
+  }
+  function swapCity(stage, c){
+    if (reduce){ setCity(stage,c); return; }
+    stage.classList.add("fading");
+    setTimeout(function(){ setCity(stage,c); stage.classList.remove("fading"); }, 450);
+  }
+
+  var stages = [].slice.call(document.querySelectorAll(".stage"));
+  var off = stages.map(function(){ return 0; });
+  stages.forEach(function(s){ setCity(s, CIDADES[0]); });
+  var last = performance.now();
+  function tick(t){
+    var dt = Math.min(0.05,(t-last)/1000); last = t;
+    stages.forEach(function(s,k){
+      if (!s.offsetParent) return;
+      off[k] += dt*190*(s.clientHeight/360);
+      var ls = s.querySelectorAll(".layer");
+      for (var i=0;i<3;i++) ls[i].style.backgroundPositionX = (-off[k]*VEL[i]).toFixed(1)+"px";
+    });
+    requestAnimationFrame(tick);
+  }
+  if (!reduce) requestAnimationFrame(tick);
+
+  var hero = document.getElementById("hero-stage"), tag = document.getElementById("hero-city"), hi = 0;
+  if (!reduce) setInterval(function(){
+    hi = (hi+1) % CIDADES.length; var c = CIDADES[hi];
+    swapCity(hero, c); tag.textContent = "Fase "+c.n+" · "+c.nome;
+  }, 7000);
+
+  var bar = document.getElementById("citybar"), fstage = document.getElementById("fase-stage"), info = document.getElementById("fase-info");
+  function estrelas(n){ return "★★★".slice(0,n)+"☆☆☆".slice(0,3-n); }
+  function showFase(i, anim){
+    var c = CIDADES[i];
+    [].forEach.call(bar.children, function(b,k){ b.setAttribute("aria-pressed", k===i ? "true":"false"); });
+    if (anim) swapCity(fstage, c); else setCity(fstage, c);
+    info.innerHTML =
+      '<div class="card"><span class="k">Fase '+c.n+'</span><h3>'+c.nome+'</h3><p>'+c.cena+'</p></div>'+
+      '<div class="card"><span class="k">Perguntas</span><h3>'+c.tema+'</h3><p>Dificuldade <span class="stars">'+estrelas(c.dif)+'</span></p></div>'+
+      '<div class="card"><span class="k">Novidade</span><p>'+c.novo+'</p><span class="k">Inimigos</span><p>'+c.ini+'</p></div>'+
+      '<div class="card"><span class="k">Técnico</span><p>Camadas em <code>assets/cenarios/'+c.id+'/parallax/</code></p><p>Topo do chão: <b class="mono">y = '+c.g+'</b> de 1080</p><span class="k">Curiosidade ao acertar</span><p>'+c.cur+'</p></div>';
+  }
+  CIDADES.forEach(function(c,i){
+    var b = document.createElement("button"); b.type = "button"; b.id = "cidade-"+c.id;
+    b.innerHTML = '<span class="n">'+c.n+'</span>'+c.nome;
+    b.addEventListener("click", function(){ showFase(i, true); });
+    bar.appendChild(b);
+  });
+  showFase(0, false);
+
+  var Q = [
+    ["Curitiba · português","Qual é o plural de \"cidadão\"?","Cidadãos"],
+    ["Curitiba · matemática","3/4 de 100 é igual a...","75"],
+    ["Foz · geografia","As Cataratas do Iguaçu ficam na divisa do Brasil com qual país?","Argentina"],
+    ["Foz · ciências","Qual bioma tem a mata das Cataratas?","Mata Atlântica"],
+    ["São Paulo · história","Em que ano foi proclamada a República no Brasil?","1889"],
+    ["São Paulo · lógica","Qual vem a seguir: 2, 4, 8, 16, ...?","32"],
+    ["Florianópolis · Bíblia","Quem derrotou o gigante Golias?","Davi (1 Samuel 17)"],
+    ["Florianópolis · Bíblia","Quantos discípulos Jesus escolheu?","12 (Marcos 3:14)"],
+    ["Porto Alegre · Bíblia","Qual é o primeiro livro da Bíblia?","Gênesis"],
+    ["Porto Alegre · matemática","Qual é a raiz quadrada de 144?","12"]
+  ];
+  var qc = document.getElementById("qcards");
+  Q.forEach(function(q,i){
+    var d = document.createElement("div"); d.className = "qc";
+    d.innerHTML = '<span class="tag">'+q[0]+'</span><b>'+q[1]+'</b><button type="button" id="qb'+i+'">Ver resposta</button><span class="ans" hidden>'+q[2]+'</span>';
+    d.querySelector("button").addEventListener("click", function(){ var a = d.querySelector(".ans"); a.hidden = !a.hidden; this.textContent = a.hidden ? "Ver resposta" : "Esconder"; });
+    qc.appendChild(d);
+  });
+
+  var code = document.getElementById("code"), AL = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  if (!reduce) setInterval(function(){
+    var s = ""; for (var i=0;i<4;i++) s += AL[Math.floor(Math.random()*AL.length)];
+    code.textContent = "FAP-26-"+s+"-"+["05","10","15"][Math.floor(Math.random()*3)];
+  }, 1600);
+
+  var NOMES = ["visao","fluxo","mecanicas","fases","perguntas","desconto","arte","godot","roteiro"];
+  function route(){
+    var h = (location.hash||"").slice(1); if (NOMES.indexOf(h) < 0) h = "visao";
+    NOMES.forEach(function(n){ document.getElementById("v-"+n).hidden = (n !== h); });
+    [].forEach.call(document.querySelectorAll("#tabs a"), function(a){
+      if (a.getAttribute("href") === "#"+h){ a.setAttribute("aria-current","page"); a.parentNode.scrollLeft = Math.max(0, a.offsetLeft - 24); }
+      else a.removeAttribute("aria-current");
+    });
+  }
+  window.addEventListener("hashchange", function(){
+    route();
+    var t = document.querySelector(".tabs");
+    if (window.scrollY > t.offsetTop) window.scrollTo({top: t.offsetTop, behavior: reduce ? "auto" : "smooth"});
+  });
+  route();
+})();
+</script>

@@ -1,0 +1,80 @@
+.botao {
+  --corte: 11px;
+  position: relative;
+  display: inline-flex;
+  padding: 1px;
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  background: linear-gradient(160deg, var(--ouro), var(--ouro-fosco) 55%, var(--ouro));
+  clip-path: polygon(
+    var(--corte) 0,
+    calc(100% - var(--corte)) 0,
+    100% var(--corte),
+    100% calc(100% - var(--corte)),
+    calc(100% - var(--corte)) 100%,
+    var(--corte) 100%,
+    0 calc(100% - var(--corte)),
+    0 var(--corte)
+  );
+  filter: drop-shadow(0 10px 18px #0009);
+  transition:
+    transform 0.3s var(--curva),
+    filter 0.3s;
+}
+
+.botao:hover {
+  transform: translateY(-3px);
+  filter: drop-shadow(0 14px 24px #000b) drop-shadow(0 0 14px #d8b56a44);
+}
+
+.botao[aria-disabled="true"] {
+  cursor: default;
+}
+
+.botao[aria-disabled="true"]:hover {
+  transform: none;
+}
+
+.conteudo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8em;
+  padding: 1.05em 2.1em;
+  /* mesmo chanfro, 1px menor, para o fio dourado aparecer nos cantos */
+  clip-path: polygon(
+    calc(var(--corte) - 1px) 0,
+    calc(100% - var(--corte) + 1px) 0,
+    100% calc(var(--corte) - 1px),
+    100% calc(100% - var(--corte) + 1px),
+    calc(100% - var(--corte) + 1px) 100%,
+    calc(var(--corte) - 1px) 100%,
+    0 calc(100% - var(--corte) + 1px),
+    0 calc(var(--corte) - 1px)
+  );
+}
+
+.moldura .conteudo {
+  color: var(--creme);
+  background: linear-gradient(#171d2b, #0d111a);
+  box-shadow: inset 0 0 0 4px #0d111a, inset 0 0 0 5px #a88b5266;
+}
+
+.moldura:hover .conteudo {
+  color: #fff;
+  box-shadow: inset 0 0 0 4px #0d111a, inset 0 0 0 5px var(--ouro);
+}
+
+.ouro .conteudo {
+  color: #1b1608;
+  background: linear-gradient(#ecd196, var(--ouro-2));
+  box-shadow: inset 0 0 0 3px #f6e7bf88;
+}
+
+.ouro:hover .conteudo {
+  background: linear-gradient(#f3dfae, #cfa65a);
+}

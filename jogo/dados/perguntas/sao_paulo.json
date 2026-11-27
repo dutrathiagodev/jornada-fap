@@ -1,0 +1,263 @@
+{
+ "fase": "sao_paulo",
+ "perguntas": [
+  {
+   "id": "sp-001",
+   "tema": "historia",
+   "dificuldade": 1,
+   "pergunta": "Em que ano foi proclamada a República no Brasil?",
+   "alternativas": [
+    "1889",
+    "1822",
+    "1500",
+    "1964"
+   ],
+   "correta": 0,
+   "explicacao": "A República foi proclamada em 15 de novembro de 1889."
+  },
+  {
+   "id": "sp-002",
+   "tema": "historia",
+   "dificuldade": 1,
+   "pergunta": "Quem proclamou a Independência do Brasil em 1822?",
+   "alternativas": [
+    "Dom Pedro I",
+    "Dom João VI",
+    "Marechal Deodoro",
+    "Getúlio Vargas"
+   ],
+   "correta": 0,
+   "explicacao": "Dom Pedro I proclamou a Independência às margens do Ipiranga."
+  },
+  {
+   "id": "sp-003",
+   "tema": "historia",
+   "dificuldade": 1,
+   "pergunta": "Em que ano Cabral chegou ao Brasil?",
+   "alternativas": [
+    "1500",
+    "1492",
+    "1822",
+    "1888"
+   ],
+   "correta": 0,
+   "explicacao": "Pedro Álvares Cabral chegou em 1500."
+  },
+  {
+   "id": "sp-004",
+   "tema": "logica",
+   "dificuldade": 1,
+   "pergunta": "Qual vem a seguir: 2, 4, 8, 16, ...?",
+   "alternativas": [
+    "32",
+    "24",
+    "30",
+    "20"
+   ],
+   "correta": 0,
+   "explicacao": "Cada número é o dobro do anterior: 16 × 2 = 32."
+  },
+  {
+   "id": "sp-005",
+   "tema": "historia",
+   "dificuldade": 2,
+   "pergunta": "Qual lei acabou com a escravidão no Brasil, em 1888?",
+   "alternativas": [
+    "Lei Áurea",
+    "Lei do Ventre Livre",
+    "Lei Eusébio de Queirós",
+    "Lei dos Sexagenários"
+   ],
+   "correta": 0,
+   "explicacao": "A Lei Áurea foi assinada em 13 de maio de 1888."
+  },
+  {
+   "id": "sp-006",
+   "tema": "tecnologia",
+   "dificuldade": 1,
+   "pergunta": "Qual destes é um dispositivo de entrada do computador?",
+   "alternativas": [
+    "Teclado",
+    "Monitor",
+    "Caixa de som",
+    "Impressora"
+   ],
+   "correta": 0,
+   "explicacao": "O teclado envia informações para o computador."
+  },
+  {
+   "id": "sp-007",
+   "tema": "tecnologia",
+   "dificuldade": 1,
+   "pergunta": "O que significa a sigla \"www\"?",
+   "alternativas": [
+    "World Wide Web",
+    "Wide World Web",
+    "World Wire Web",
+    "Web World Wide"
+   ],
+   "correta": 0,
+   "explicacao": "WWW quer dizer World Wide Web, a \"teia mundial\"."
+  },
+  {
+   "id": "sp-008",
+   "tema": "logica",
+   "dificuldade": 2,
+   "pergunta": "Qual vem a seguir: 1, 1, 2, 3, 5, 8, ...?",
+   "alternativas": [
+    "13",
+    "11",
+    "12",
+    "10"
+   ],
+   "correta": 0,
+   "explicacao": "Cada número é a soma dos dois anteriores: 5 + 8 = 13."
+  },
+  {
+   "id": "sp-009",
+   "tema": "geografia",
+   "dificuldade": 1,
+   "pergunta": "Qual é a cidade mais populosa do Brasil?",
+   "alternativas": [
+    "São Paulo",
+    "Rio de Janeiro",
+    "Brasília",
+    "Salvador"
+   ],
+   "correta": 0,
+   "explicacao": "São Paulo é a maior cidade do país."
+  },
+  {
+   "id": "sp-010",
+   "tema": "tecnologia",
+   "dificuldade": 1,
+   "pergunta": "Qual destes programas serve para navegar na internet?",
+   "alternativas": [
+    "Navegador",
+    "Planilha",
+    "Editor de som",
+    "Calculadora"
+   ],
+   "correta": 0,
+   "explicacao": "O navegador (browser) abre as páginas da internet."
+  },
+  {
+   "id": "sp-011",
+   "tema": "logica",
+   "dificuldade": 1,
+   "pergunta": "Todo gato é animal e Mimi é um gato. Então Mimi é...",
+   "alternativas": [
+    "um animal",
+    "um cachorro",
+    "uma planta",
+    "uma pedra"
+   ],
+   "correta": 0,
+   "explicacao": "Se todo gato é animal, Mimi também é."
+  },
+  {
+   "id": "sp-012",
+   "tema": "logica",
+   "dificuldade": 1,
+   "pergunta": "Qual é o próximo número: 5, 10, 15, 20, ...?",
+   "alternativas": [
+    "25",
+    "30",
+    "22",
+    "35"
+   ],
+   "correta": 0,
+   "explicacao": "A cada passo soma 5: 20 + 5 = 25."
+  }
+ ],
+ "vf": [
+  {
+   "id": "sp-v01",
+   "tema": "historia",
+   "pergunta": "O Brasil foi colônia de Portugal.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "Até 1822 o Brasil pertenceu a Portugal."
+  },
+  {
+   "id": "sp-v02",
+   "tema": "cultura",
+   "pergunta": "O MASP é um museu de arte em São Paulo.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "O Museu de Arte de São Paulo fica na Avenida Paulista."
+  },
+  {
+   "id": "sp-v03",
+   "tema": "tecnologia",
+   "pergunta": "Um byte tem 8 bits.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "1 byte = 8 bits."
+  },
+  {
+   "id": "sp-v04",
+   "tema": "tecnologia",
+   "pergunta": "Internet e Wi-Fi são a mesma coisa.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 1,
+   "explicacao": "Wi-Fi é a forma de conectar sem fio; a internet é a rede mundial."
+  },
+  {
+   "id": "sp-v05",
+   "tema": "historia",
+   "pergunta": "O Brasil se tornou independente em 1822.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "A Independência foi em 7 de setembro de 1822."
+  },
+  {
+   "id": "sp-v06",
+   "tema": "matematica",
+   "pergunta": "O número 15 é par.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 1,
+   "explicacao": "15 é ímpar: não se divide por 2 sem sobra."
+  },
+  {
+   "id": "sp-v07",
+   "tema": "historia",
+   "pergunta": "Brasília foi inaugurada como capital em 1960.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "Brasília foi inaugurada em 21 de abril de 1960."
+  },
+  {
+   "id": "sp-v08",
+   "tema": "tecnologia",
+   "pergunta": "Windows e Linux são sistemas operacionais.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "Sistema operacional é o programa que controla o computador."
+  }
+ ]
+}

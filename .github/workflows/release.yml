@@ -1,0 +1,123 @@
+name: Release
+
+# Gera os instaladores do Jornada FAP para Windows, macOS e Linux.
+# Rode manualmente (Actions > Release > Run workflow) só para testar a build,
+# ou crie uma tag para publicar:  git tag v1.0.0 && git push --tags
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "4.7.2"
+
+# o projeto do jogo fica na pasta jogo/ (o site fica em site/)
+defaults:
+  run:
+    working-directory: jogo
+
+permissions:
+  contents: read
+
+jobs:
+  exportar:
+    name: Exportar com o Godot
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Baixar o Godot e os modelos de exportação
+        run: |
+          base="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable"
+          curl -fsSL -o godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          curl -fsSL -o templates.tpz "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          unzip -q godot.zip
+          mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
+          mkdir -p ~/.local/share/godot/export_templates
+          unzip -q templates.tpz -d tpl
+          mv tpl/templates ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+      - name: Importar os recursos
+        run: godot --headless --import || true
+      - name: Exportar Windows, Linux e macOS
+        run: |
+          mkdir -p build/windows build/linux build/mac
+          godot --headless --export-release "Windows" build/windows/JornadaFAP.exe
+          godot --headless --export-release "Linux" build/linux/JornadaFAP.x86_64
+          godot --headless --export-release "macOS" build/mac/JornadaFAP.zip
+      - name: Pacote do Linux (jogo + instalar.sh)
+        run: |
+          mkdir JornadaFAP
+          cp build/linux/JornadaFAP.x86_64 icone.png linux/instalar.sh JornadaFAP/
+          chmod +x JornadaFAP/instalar.sh JornadaFAP/JornadaFAP.x86_64
+          tar -czf JornadaFAP-linux-x64.tar.gz JornadaFAP
+      - uses: actions/upload-artifact@v4
+        with:
+          name: exportado
+          path: |
+            jogo/build/windows/JornadaFAP.exe
+            jogo/build/mac/JornadaFAP.zip
+            jogo/JornadaFAP-linux-x64.tar.gz
+
+  windows:
+    name: Instalador do Windows
+    needs: exportar
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: exportado
+          path: jogo
+      - name: Inno Setup
+        shell: pwsh
+        run: |
+          choco install innosetup -y --no-progress
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=1.0.0" installer\JornadaFAP.iss
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: jogo/JornadaFAP-windows-x64-setup.exe
+
+  macos:
+    name: Instalador do macOS
+    needs: exportar
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: exportado
+          path: jogo
+      - name: Montar o .pkg (instala em Aplicativos e cria atalho na área de trabalho)
+        run: |
+          mkdir pkgroot
+          ditto -x -k build/mac/JornadaFAP.zip pkgroot
+          pkgbuild --root pkgroot --install-location /Applications \
+            --scripts installer/macos --identifier br.edu.fap.jornada --version 1.0.0 \
+            JornadaFAP-macos.pkg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: jogo/JornadaFAP-macos.pkg
+
+  publicar:
+    name: Publicar release
+    needs: [exportar, windows, macos]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: jogo/assets
+      - name: Reunir os arquivos e gerar checksums
+        run: |
+          mkdir final
+          cp assets/windows/*.exe assets/macos/*.pkg assets/exportado/JornadaFAP-linux-x64.tar.gz final/
+          cd final && sha256sum * > SHA256SUMS.txt && cat SHA256SUMS.txt
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: Jornada FAP ${{ github.ref_name }}
+          body_path: .github/release-notes.md
+          files: jogo/final/*

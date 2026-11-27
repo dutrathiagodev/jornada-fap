@@ -1,0 +1,37 @@
+.menino {
+  --tam: clamp(190px, 36vh, 380px);
+  position: absolute;
+  z-index: 3;
+  bottom: 21%;
+  left: calc(10% + var(--p, 0) * 62%);
+  width: var(--tam);
+  height: var(--tam);
+  scale: var(--dir, 1) 1;
+  filter: drop-shadow(0 14px 14px #0006);
+}
+
+.sprite {
+  width: 100%;
+  height: 100%;
+  background: var(--sprite-parado) 0 0 / calc(var(--tam) * 38) var(--tam) no-repeat;
+  animation: parado 1.58s steps(38) infinite;
+}
+
+/* o atributo vem do herói pai (useProgressoRolagem) */
+:global([data-rolando="true"]) .sprite {
+  background-image: var(--sprite-correr);
+  background-size: calc(var(--tam) * 19) var(--tam);
+  animation: correr 0.79s steps(19) infinite;
+}
+
+@keyframes parado {
+  to {
+    background-position: calc(var(--tam) * -38) 0;
+  }
+}
+
+@keyframes correr {
+  to {
+    background-position: calc(var(--tam) * -19) 0;
+  }
+}

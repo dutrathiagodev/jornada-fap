@@ -1,0 +1,76 @@
+.dialogo {
+  margin: auto;
+  max-width: 94vw;
+  max-height: 94vh;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--creme);
+  overflow: visible;
+}
+
+.dialogo::backdrop {
+  background: #05070cee;
+  backdrop-filter: blur(6px);
+}
+
+.figura {
+  display: grid;
+  gap: 12px;
+  text-align: center;
+}
+
+.imagem {
+  max-height: 82vh;
+  width: auto;
+  max-width: 94vw;
+  border: 2px solid var(--ouro);
+  box-shadow: 0 30px 90px #000;
+}
+
+.legenda {
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.fechar,
+.seta {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  color: var(--creme);
+  background: #0d111af2;
+  border: 1px solid var(--ouro-fosco);
+  transition:
+    background 0.25s,
+    color 0.25s;
+}
+
+.fechar:hover,
+.seta:hover {
+  color: var(--noite);
+  background: var(--ouro);
+}
+
+.fechar {
+  top: -16px;
+  right: -16px;
+}
+
+.seta {
+  top: 50%;
+  translate: 0 -50%;
+}
+
+.anterior {
+  left: -22px;
+}
+
+.proxima {
+  right: -22px;
+}

@@ -1,0 +1,48 @@
+.interludio {
+  min-height: 62vh;
+  display: grid;
+  place-items: center;
+  padding: 80px var(--margem);
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% 50%, #1c2a4555, transparent 62%),
+    var(--noite);
+  scroll-snap-align: center;
+}
+
+.frase {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0 0.3em;
+  max-width: 1000px;
+  font-family: var(--fonte-titulo);
+  font-weight: 500;
+  font-size: clamp(1.9rem, 5vw, 3.8rem);
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--creme);
+}
+
+.palavra {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(24px);
+  filter: blur(8px);
+  transition:
+    opacity 0.9s var(--curva),
+    transform 0.9s var(--curva),
+    filter 0.9s var(--curva);
+}
+
+.palavra[data-ouro="true"] {
+  font-weight: 700;
+  color: var(--ouro);
+}
+
+[data-visivel="true"] .palavra {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}

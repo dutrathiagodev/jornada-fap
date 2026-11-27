@@ -1,0 +1,22 @@
+.rodape {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 40px var(--margem);
+  background: #05070c;
+  border-top: 1px solid #a88b5255;
+  color: var(--suave);
+  font-size: 0.88rem;
+  scroll-snap-align: end;
+}
+
+.logo {
+  height: 40px;
+  width: auto;
+}
+
+.legal {
+  max-width: 660px;
+}

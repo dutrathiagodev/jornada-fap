@@ -1,0 +1,79 @@
+.jogo {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  align-items: center;
+  gap: clamp(30px, 6vw, 90px);
+  padding: 110px var(--margem) 90px;
+  background:
+    radial-gradient(circle at 12% 30%, #1c2a4588 0%, transparent 55%),
+    radial-gradient(circle at 90% 90%, #1a2b4766 0%, transparent 50%),
+    var(--noite);
+  scroll-snap-align: start;
+  overflow: hidden;
+}
+
+.moldura {
+  display: grid;
+  place-items: center;
+}
+
+.texto {
+  display: grid;
+  justify-items: start;
+  align-content: center;
+  gap: 14px;
+}
+
+.lead {
+  max-width: 600px;
+  font-size: clamp(1rem, 1.5vw, 1.18rem);
+  color: var(--suave);
+}
+
+.fatos {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  gap: 26px;
+  margin: 18px 0 14px;
+}
+
+.fato {
+  display: grid;
+  gap: 2px;
+  padding-left: 14px;
+  border-left: 2px solid var(--ouro-fosco);
+}
+
+.fato svg {
+  color: var(--ouro);
+  margin-bottom: 6px;
+}
+
+.fato strong {
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 2.3rem;
+  line-height: 1;
+  color: var(--ouro);
+}
+
+.fato span {
+  font-size: 0.82rem;
+  color: var(--suave);
+  max-width: 120px;
+  line-height: 1.3;
+}
+
+@media (max-width: 900px) {
+  .jogo {
+    grid-template-columns: 1fr;
+    padding-top: 90px;
+  }
+
+  .fatos {
+    grid-template-columns: repeat(2, auto);
+  }
+}

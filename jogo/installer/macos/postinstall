@@ -1,0 +1,9 @@
+#!/bin/bash
+# Depois de copiar o app para /Applications, coloca um atalho na área de trabalho do usuário.
+USUARIO="$(stat -f%Su /dev/console)"
+DESKTOP="/Users/$USUARIO/Desktop"
+if [ -d "$DESKTOP" ]; then
+    ln -sf "/Applications/JornadaFAP.app" "$DESKTOP/Jornada FAP"
+    chown -h "$USUARIO" "$DESKTOP/Jornada FAP"
+fi
+exit 0

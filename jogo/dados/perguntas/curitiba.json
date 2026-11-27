@@ -1,0 +1,263 @@
+{
+ "fase": "curitiba",
+ "perguntas": [
+  {
+   "id": "cwb-001",
+   "tema": "matematica",
+   "dificuldade": 1,
+   "pergunta": "Quanto é 25% de 80?",
+   "alternativas": [
+    "20",
+    "25",
+    "16",
+    "40"
+   ],
+   "correta": 0,
+   "explicacao": "25% é um quarto. 80 ÷ 4 = 20."
+  },
+  {
+   "id": "cwb-002",
+   "tema": "portugues",
+   "dificuldade": 1,
+   "pergunta": "Qual palavra está escrita corretamente?",
+   "alternativas": [
+    "Exceção",
+    "Excessão",
+    "Eceção",
+    "Esceção"
+   ],
+   "correta": 0,
+   "explicacao": "Exceção vem do verbo excetuar."
+  },
+  {
+   "id": "cwb-003",
+   "tema": "portugues",
+   "dificuldade": 1,
+   "pergunta": "Qual é o plural de \"cidadão\"?",
+   "alternativas": [
+    "Cidadãos",
+    "Cidadões",
+    "Cidadães",
+    "Cidadãoes"
+   ],
+   "correta": 0,
+   "explicacao": "Cidadão faz o plural em -ãos: cidadãos."
+  },
+  {
+   "id": "cwb-004",
+   "tema": "matematica",
+   "dificuldade": 1,
+   "pergunta": "3/4 de 100 é igual a...",
+   "alternativas": [
+    "75",
+    "34",
+    "25",
+    "70"
+   ],
+   "correta": 0,
+   "explicacao": "100 ÷ 4 = 25, e 25 × 3 = 75."
+  },
+  {
+   "id": "cwb-005",
+   "tema": "portugues",
+   "dificuldade": 2,
+   "pergunta": "Qual frase está com a crase correta?",
+   "alternativas": [
+    "Fui à escola.",
+    "Fui a escola.",
+    "Fui à pé.",
+    "Vou à comprar pão."
+   ],
+   "correta": 0,
+   "explicacao": "Ir a + a escola = à escola. Antes de verbo ou de \"pé\" não há crase."
+  },
+  {
+   "id": "cwb-006",
+   "tema": "matematica",
+   "dificuldade": 1,
+   "pergunta": "Quanto é 7 × 8?",
+   "alternativas": [
+    "56",
+    "54",
+    "64",
+    "48"
+   ],
+   "correta": 0,
+   "explicacao": "7 × 8 = 56."
+  },
+  {
+   "id": "cwb-007",
+   "tema": "matematica",
+   "dificuldade": 1,
+   "pergunta": "Quantos lados tem um hexágono?",
+   "alternativas": [
+    "6",
+    "5",
+    "8",
+    "7"
+   ],
+   "correta": 0,
+   "explicacao": "Hexa significa seis: o hexágono tem 6 lados."
+  },
+  {
+   "id": "cwb-008",
+   "tema": "portugues",
+   "dificuldade": 1,
+   "pergunta": "Qual destas palavras é um substantivo?",
+   "alternativas": [
+    "Casa",
+    "Correr",
+    "Bonito",
+    "Rapidamente"
+   ],
+   "correta": 0,
+   "explicacao": "Substantivo dá nome às coisas: casa."
+  },
+  {
+   "id": "cwb-009",
+   "tema": "portugues",
+   "dificuldade": 2,
+   "pergunta": "Qual é o antônimo de \"generoso\"?",
+   "alternativas": [
+    "Mesquinho",
+    "Bondoso",
+    "Gentil",
+    "Alegre"
+   ],
+   "correta": 0,
+   "explicacao": "Generoso é quem dá; mesquinho é quem não quer dar."
+  },
+  {
+   "id": "cwb-010",
+   "tema": "matematica",
+   "dificuldade": 2,
+   "pergunta": "Quanto é 1/2 + 1/4?",
+   "alternativas": [
+    "3/4",
+    "2/6",
+    "1/6",
+    "2/4"
+   ],
+   "correta": 0,
+   "explicacao": "1/2 = 2/4, e 2/4 + 1/4 = 3/4."
+  },
+  {
+   "id": "cwb-011",
+   "tema": "matematica",
+   "dificuldade": 2,
+   "pergunta": "Quanto é 15 + 27 ÷ 3?",
+   "alternativas": [
+    "24",
+    "14",
+    "18",
+    "12"
+   ],
+   "correta": 0,
+   "explicacao": "Primeiro a divisão: 27 ÷ 3 = 9. Depois a soma: 15 + 9 = 24."
+  },
+  {
+   "id": "cwb-012",
+   "tema": "portugues",
+   "dificuldade": 1,
+   "pergunta": "Em \"Os meninos correram rápido\", qual é o verbo?",
+   "alternativas": [
+    "correram",
+    "meninos",
+    "Os",
+    "rápido"
+   ],
+   "correta": 0,
+   "explicacao": "O verbo indica a ação: correram."
+  }
+ ],
+ "vf": [
+  {
+   "id": "cwb-v01",
+   "tema": "geografia",
+   "pergunta": "Curitiba é a capital do Paraná.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "Curitiba é a capital do estado do Paraná."
+  },
+  {
+   "id": "cwb-v02",
+   "tema": "portugues",
+   "pergunta": "A palavra \"exceção\" é escrita com ç.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "Exceção leva ç, como em \"excetuar\"."
+  },
+  {
+   "id": "cwb-v03",
+   "tema": "matematica",
+   "pergunta": "1/2 é maior que 3/4.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 1,
+   "explicacao": "3/4 é igual a 0,75 e 1/2 é 0,5. Então 3/4 é maior."
+  },
+  {
+   "id": "cwb-v04",
+   "tema": "matematica",
+   "pergunta": "O número 0,5 é igual a 1/2.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "Meio é 1 dividido por 2, que dá 0,5."
+  },
+  {
+   "id": "cwb-v05",
+   "tema": "ciencias",
+   "pergunta": "A araucária é a árvore-símbolo do Paraná.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "O pinheiro-do-paraná (araucária) é o símbolo do estado."
+  },
+  {
+   "id": "cwb-v06",
+   "tema": "portugues",
+   "pergunta": "\"Mal\" e \"mau\" significam sempre a mesma coisa.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 1,
+   "explicacao": "Mau é o contrário de bom; mal é o contrário de bem."
+  },
+  {
+   "id": "cwb-v07",
+   "tema": "matematica",
+   "pergunta": "7 × 6 = 42.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "7 × 6 = 42."
+  },
+  {
+   "id": "cwb-v08",
+   "tema": "portugues",
+   "pergunta": "A palavra \"paralelepípedo\" tem acento.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "É proparoxítona, e toda proparoxítona leva acento."
+  }
+ ]
+}

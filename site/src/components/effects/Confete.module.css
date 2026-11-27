@@ -1,0 +1,22 @@
+.confete {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.confete i {
+  position: absolute;
+  top: -20px;
+  width: 10px;
+  height: 16px;
+  border-radius: 2px;
+  animation: cair linear infinite;
+}
+
+@keyframes cair {
+  to {
+    transform: translateY(115vh) rotate(720deg);
+  }
+}

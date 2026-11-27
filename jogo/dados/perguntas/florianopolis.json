@@ -1,0 +1,282 @@
+{
+ "fase": "florianopolis",
+ "perguntas": [
+  {
+   "id": "fln-001",
+   "tema": "biblia",
+   "dificuldade": 1,
+   "pergunta": "Quem construiu a arca a pedido de Deus?",
+   "alternativas": [
+    "Noé",
+    "Moisés",
+    "Abraão",
+    "Davi"
+   ],
+   "correta": 0,
+   "explicacao": "Deus pediu a Noé que construísse a arca.",
+   "referencia": "Gênesis 6:13-14"
+  },
+  {
+   "id": "fln-002",
+   "tema": "biblia",
+   "dificuldade": 1,
+   "pergunta": "Quem derrotou o gigante Golias?",
+   "alternativas": [
+    "Davi",
+    "Saul",
+    "Sansão",
+    "Josué"
+   ],
+   "correta": 0,
+   "explicacao": "O jovem pastor Davi venceu Golias com uma funda e uma pedra.",
+   "referencia": "1 Samuel 17"
+  },
+  {
+   "id": "fln-003",
+   "tema": "biblia",
+   "dificuldade": 1,
+   "pergunta": "Quantos discípulos Jesus escolheu?",
+   "alternativas": [
+    "12",
+    "7",
+    "10",
+    "70"
+   ],
+   "correta": 0,
+   "explicacao": "Jesus escolheu doze apóstolos.",
+   "referencia": "Marcos 3:14"
+  },
+  {
+   "id": "fln-004",
+   "tema": "biblia",
+   "dificuldade": 1,
+   "pergunta": "Quem foi lançado na cova dos leões?",
+   "alternativas": [
+    "Daniel",
+    "José",
+    "Jonas",
+    "Elias"
+   ],
+   "correta": 0,
+   "explicacao": "Daniel foi lançado aos leões porque orava a Deus, e Deus o protegeu.",
+   "referencia": "Daniel 6"
+  },
+  {
+   "id": "fln-005",
+   "tema": "biblia",
+   "dificuldade": 1,
+   "pergunta": "Quem foi engolido por um grande peixe?",
+   "alternativas": [
+    "Jonas",
+    "Pedro",
+    "Paulo",
+    "Noé"
+   ],
+   "correta": 0,
+   "explicacao": "Jonas ficou três dias dentro do grande peixe.",
+   "referencia": "Jonas 1:17"
+  },
+  {
+   "id": "fln-006",
+   "tema": "biblia",
+   "dificuldade": 1,
+   "pergunta": "Em quantos dias Deus criou o mundo antes de descansar?",
+   "alternativas": [
+    "6",
+    "7",
+    "5",
+    "10"
+   ],
+   "correta": 0,
+   "explicacao": "Deus criou em seis dias e descansou no sétimo.",
+   "referencia": "Gênesis 1:31 e 2:2"
+  },
+  {
+   "id": "fln-007",
+   "tema": "biblia",
+   "dificuldade": 1,
+   "pergunta": "Quem recebeu os Dez Mandamentos no monte Sinai?",
+   "alternativas": [
+    "Moisés",
+    "Abraão",
+    "Elias",
+    "Paulo"
+   ],
+   "correta": 0,
+   "explicacao": "Moisés recebeu a Lei de Deus no monte Sinai.",
+   "referencia": "Êxodo 20"
+  },
+  {
+   "id": "fln-008",
+   "tema": "biblia",
+   "dificuldade": 1,
+   "pergunta": "Em qual cidade Jesus nasceu?",
+   "alternativas": [
+    "Belém",
+    "Nazaré",
+    "Jerusalém",
+    "Cafarnaum"
+   ],
+   "correta": 0,
+   "explicacao": "Jesus nasceu em Belém da Judeia.",
+   "referencia": "Mateus 2:1"
+  },
+  {
+   "id": "fln-009",
+   "tema": "biblia",
+   "dificuldade": 1,
+   "pergunta": "Qual é o primeiro livro da Bíblia?",
+   "alternativas": [
+    "Gênesis",
+    "Êxodo",
+    "Salmos",
+    "Mateus"
+   ],
+   "correta": 0,
+   "explicacao": "Gênesis significa \"princípio\" e abre a Bíblia.",
+   "referencia": "Gênesis 1:1"
+  },
+  {
+   "id": "fln-010",
+   "tema": "biblia",
+   "dificuldade": 2,
+   "pergunta": "Qual filho de Jacó foi vendido pelos irmãos e depois governou o Egito?",
+   "alternativas": [
+    "José",
+    "Benjamim",
+    "Judá",
+    "Rúben"
+   ],
+   "correta": 0,
+   "explicacao": "José foi vendido, mas Deus o levou a governar o Egito.",
+   "referencia": "Gênesis 37 e 41"
+  },
+  {
+   "id": "fln-011",
+   "tema": "biblia",
+   "dificuldade": 2,
+   "pergunta": "Qual era a profissão de Jesus em Nazaré?",
+   "alternativas": [
+    "Carpinteiro",
+    "Pescador",
+    "Soldado",
+    "Médico"
+   ],
+   "correta": 0,
+   "explicacao": "Jesus era conhecido como o carpinteiro.",
+   "referencia": "Marcos 6:3"
+  },
+  {
+   "id": "fln-012",
+   "tema": "biblia",
+   "dificuldade": 1,
+   "pergunta": "Qual homem muito forte perdeu a força quando cortaram seu cabelo?",
+   "alternativas": [
+    "Sansão",
+    "Davi",
+    "Golias",
+    "Saul"
+   ],
+   "correta": 0,
+   "explicacao": "A força de Sansão estava ligada ao seu voto a Deus.",
+   "referencia": "Juízes 16"
+  }
+ ],
+ "vf": [
+  {
+   "id": "fln-v01",
+   "tema": "biblia",
+   "pergunta": "Jesus foi batizado no rio Jordão.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "João Batista batizou Jesus no Jordão.",
+   "referencia": "Mateus 3:13"
+  },
+  {
+   "id": "fln-v02",
+   "tema": "biblia",
+   "pergunta": "A arca de Noé foi construída para guardar ouro.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 1,
+   "explicacao": "A arca salvou Noé, sua família e os animais do dilúvio.",
+   "referencia": "Gênesis 6:19"
+  },
+  {
+   "id": "fln-v03",
+   "tema": "biblia",
+   "pergunta": "Jesus alimentou uma multidão com cinco pães e dois peixes.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "Todos comeram e ainda sobraram doze cestos.",
+   "referencia": "João 6:9-13"
+  },
+  {
+   "id": "fln-v04",
+   "tema": "biblia",
+   "pergunta": "Davi já era rei quando enfrentou Golias.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 1,
+   "explicacao": "Davi era um jovem pastor quando venceu Golias.",
+   "referencia": "1 Samuel 17"
+  },
+  {
+   "id": "fln-v05",
+   "tema": "biblia",
+   "pergunta": "Deus descansou no sétimo dia da criação.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "O sétimo dia foi abençoado e santificado por Deus.",
+   "referencia": "Gênesis 2:2-3"
+  },
+  {
+   "id": "fln-v06",
+   "tema": "biblia",
+   "pergunta": "A Bíblia tem 66 livros.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "São 39 no Antigo Testamento e 27 no Novo Testamento."
+  },
+  {
+   "id": "fln-v07",
+   "tema": "biblia",
+   "pergunta": "Daniel foi lançado aos leões porque orava a Deus.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "Daniel continuou orando mesmo com a proibição do rei.",
+   "referencia": "Daniel 6"
+  },
+  {
+   "id": "fln-v08",
+   "tema": "biblia",
+   "pergunta": "Moisés atravessou o Mar Vermelho de barco.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 1,
+   "explicacao": "Deus abriu o mar e o povo passou a pé, em terra seca.",
+   "referencia": "Êxodo 14:21-22"
+  }
+ ]
+}

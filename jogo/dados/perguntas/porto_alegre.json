@@ -1,0 +1,267 @@
+{
+ "fase": "porto_alegre",
+ "perguntas": [
+  {
+   "id": "poa-001",
+   "tema": "matematica",
+   "dificuldade": 2,
+   "pergunta": "Qual é a raiz quadrada de 144?",
+   "alternativas": [
+    "12",
+    "14",
+    "11",
+    "16"
+   ],
+   "correta": 0,
+   "explicacao": "12 × 12 = 144."
+  },
+  {
+   "id": "poa-002",
+   "tema": "biblia",
+   "dificuldade": 2,
+   "pergunta": "Quantos livros tem o Novo Testamento?",
+   "alternativas": [
+    "27",
+    "39",
+    "66",
+    "12"
+   ],
+   "correta": 0,
+   "explicacao": "O Novo Testamento tem 27 livros, de Mateus a Apocalipse."
+  },
+  {
+   "id": "poa-003",
+   "tema": "biblia",
+   "dificuldade": 2,
+   "pergunta": "O Sermão do Monte começa com as...",
+   "alternativas": [
+    "Bem-aventuranças",
+    "Pragas",
+    "Parábolas",
+    "Cartas"
+   ],
+   "correta": 0,
+   "explicacao": "Jesus começa o sermão com as Bem-aventuranças.",
+   "referencia": "Mateus 5:3-12"
+  },
+  {
+   "id": "poa-004",
+   "tema": "matematica",
+   "dificuldade": 2,
+   "pergunta": "Quanto é 2³ + 4²?",
+   "alternativas": [
+    "24",
+    "20",
+    "28",
+    "32"
+   ],
+   "correta": 0,
+   "explicacao": "2³ = 8 e 4² = 16. Então 8 + 16 = 24."
+  },
+  {
+   "id": "poa-005",
+   "tema": "geografia",
+   "dificuldade": 1,
+   "pergunta": "Porto Alegre é a capital de qual estado?",
+   "alternativas": [
+    "Rio Grande do Sul",
+    "Santa Catarina",
+    "Paraná",
+    "São Paulo"
+   ],
+   "correta": 0,
+   "explicacao": "Porto Alegre é a capital do Rio Grande do Sul."
+  },
+  {
+   "id": "poa-006",
+   "tema": "geografia",
+   "dificuldade": 2,
+   "pergunta": "Qual corpo de água fica na frente de Porto Alegre?",
+   "alternativas": [
+    "Guaíba",
+    "Rio Tietê",
+    "Rio Iguaçu",
+    "Rio Amazonas"
+   ],
+   "correta": 0,
+   "explicacao": "O Guaíba banha Porto Alegre e é famoso pelo pôr do sol."
+  },
+  {
+   "id": "poa-007",
+   "tema": "portugues",
+   "dificuldade": 2,
+   "pergunta": "Qual frase está correta?",
+   "alternativas": [
+    "Houve muitos problemas.",
+    "Houveram muitos problemas.",
+    "Haviam muitos problemas.",
+    "Fazem dois anos que moro aqui."
+   ],
+   "correta": 0,
+   "explicacao": "Haver no sentido de existir não vai para o plural: houve."
+  },
+  {
+   "id": "poa-008",
+   "tema": "biblia",
+   "dificuldade": 2,
+   "pergunta": "Quem entregou Jesus por 30 moedas de prata?",
+   "alternativas": [
+    "Judas",
+    "Pedro",
+    "Tomé",
+    "João"
+   ],
+   "correta": 0,
+   "explicacao": "Judas Iscariotes combinou a entrega por trinta moedas.",
+   "referencia": "Mateus 26:14-16"
+  },
+  {
+   "id": "poa-009",
+   "tema": "matematica",
+   "dificuldade": 2,
+   "pergunta": "Quanto é 15% de 200?",
+   "alternativas": [
+    "30",
+    "15",
+    "20",
+    "25"
+   ],
+   "correta": 0,
+   "explicacao": "10% de 200 é 20 e 5% é 10; juntos dão 30."
+  },
+  {
+   "id": "poa-010",
+   "tema": "ciencias",
+   "dificuldade": 2,
+   "pergunta": "Qual é a ordem dos planetas mais próximos do Sol?",
+   "alternativas": [
+    "Mercúrio, Vênus, Terra",
+    "Vênus, Mercúrio, Terra",
+    "Terra, Vênus, Mercúrio",
+    "Mercúrio, Terra, Vênus"
+   ],
+   "correta": 0,
+   "explicacao": "Primeiro Mercúrio, depois Vênus e a Terra."
+  },
+  {
+   "id": "poa-011",
+   "tema": "biblia",
+   "dificuldade": 2,
+   "pergunta": "Quem levou o povo à Terra Prometida depois de Moisés?",
+   "alternativas": [
+    "Josué",
+    "Calebe",
+    "Arão",
+    "Samuel"
+   ],
+   "correta": 0,
+   "explicacao": "Josué foi o sucessor de Moisés.",
+   "referencia": "Josué 1:1-2"
+  },
+  {
+   "id": "poa-012",
+   "tema": "matematica",
+   "dificuldade": 2,
+   "pergunta": "Qual é a área de um quadrado de lado 9?",
+   "alternativas": [
+    "81",
+    "18",
+    "36",
+    "72"
+   ],
+   "correta": 0,
+   "explicacao": "Área do quadrado = lado × lado. 9 × 9 = 81."
+  }
+ ],
+ "vf": [
+  {
+   "id": "poa-v01",
+   "tema": "geografia",
+   "pergunta": "Porto Alegre fica no Rio Grande do Sul.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "É a capital do estado gaúcho."
+  },
+  {
+   "id": "poa-v02",
+   "tema": "biblia",
+   "pergunta": "O livro de Salmos é o maior livro da Bíblia.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "Salmos tem 150 capítulos."
+  },
+  {
+   "id": "poa-v03",
+   "tema": "ciencias",
+   "pergunta": "O número zero é par.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "Zero é par: 0 ÷ 2 = 0, sem sobra."
+  },
+  {
+   "id": "poa-v04",
+   "tema": "biblia",
+   "pergunta": "Jesus ressuscitou no terceiro dia.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "Jesus ressuscitou no terceiro dia, como havia dito.",
+   "referencia": "Lucas 24:7"
+  },
+  {
+   "id": "poa-v05",
+   "tema": "matematica",
+   "pergunta": "A soma dos ângulos de um triângulo é 180°.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "Em qualquer triângulo, os ângulos somam 180°."
+  },
+  {
+   "id": "poa-v06",
+   "tema": "biblia",
+   "pergunta": "O apóstolo Paulo escreveu o livro de Gênesis.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 1,
+   "explicacao": "Gênesis foi escrito por Moisés; Paulo escreveu cartas do Novo Testamento."
+  },
+  {
+   "id": "poa-v07",
+   "tema": "geografia",
+   "pergunta": "O Brasil fica na América do Sul.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "O Brasil ocupa quase metade da América do Sul."
+  },
+  {
+   "id": "poa-v08",
+   "tema": "geografia",
+   "pergunta": "A água do Guaíba é salgada.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 1,
+   "explicacao": "É água doce."
+  }
+ ]
+}

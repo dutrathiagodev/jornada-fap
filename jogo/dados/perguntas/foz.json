@@ -1,0 +1,263 @@
+{
+ "fase": "foz",
+ "perguntas": [
+  {
+   "id": "foz-001",
+   "tema": "geografia",
+   "dificuldade": 1,
+   "pergunta": "As Cataratas do Iguaçu ficam na divisa do Brasil com qual país?",
+   "alternativas": [
+    "Argentina",
+    "Chile",
+    "Uruguai",
+    "Bolívia"
+   ],
+   "correta": 0,
+   "explicacao": "As quedas ficam na fronteira entre o Brasil e a Argentina."
+  },
+  {
+   "id": "foz-002",
+   "tema": "ciencias",
+   "dificuldade": 1,
+   "pergunta": "Qual bioma tem a mata das Cataratas?",
+   "alternativas": [
+    "Mata Atlântica",
+    "Amazônia",
+    "Cerrado",
+    "Caatinga"
+   ],
+   "correta": 0,
+   "explicacao": "O Parque Nacional do Iguaçu protege um grande trecho de Mata Atlântica."
+  },
+  {
+   "id": "foz-003",
+   "tema": "ciencias",
+   "dificuldade": 1,
+   "pergunta": "Como se chama a passagem da água líquida para vapor?",
+   "alternativas": [
+    "Evaporação",
+    "Condensação",
+    "Solidificação",
+    "Fusão"
+   ],
+   "correta": 0,
+   "explicacao": "Com o calor do Sol, a água líquida evapora e vira vapor."
+  },
+  {
+   "id": "foz-004",
+   "tema": "ciencias",
+   "dificuldade": 1,
+   "pergunta": "Qual gás as plantas absorvem para fazer a fotossíntese?",
+   "alternativas": [
+    "Gás carbônico",
+    "Oxigênio",
+    "Nitrogênio",
+    "Hélio"
+   ],
+   "correta": 0,
+   "explicacao": "As plantas usam gás carbônico, água e luz para produzir seu alimento."
+  },
+  {
+   "id": "foz-005",
+   "tema": "geografia",
+   "dificuldade": 1,
+   "pergunta": "Qual é a capital do Paraná?",
+   "alternativas": [
+    "Curitiba",
+    "Londrina",
+    "Foz do Iguaçu",
+    "Maringá"
+   ],
+   "correta": 0,
+   "explicacao": "Curitiba é a capital do Paraná."
+  },
+  {
+   "id": "foz-006",
+   "tema": "geografia",
+   "dificuldade": 1,
+   "pergunta": "Qual rio forma as Cataratas do Iguaçu?",
+   "alternativas": [
+    "Rio Iguaçu",
+    "Rio Tietê",
+    "Rio Amazonas",
+    "Rio São Francisco"
+   ],
+   "correta": 0,
+   "explicacao": "As quedas se formam no Rio Iguaçu."
+  },
+  {
+   "id": "foz-007",
+   "tema": "geografia",
+   "dificuldade": 1,
+   "pergunta": "Quantos estados tem a região Sul do Brasil?",
+   "alternativas": [
+    "3",
+    "4",
+    "5",
+    "2"
+   ],
+   "correta": 0,
+   "explicacao": "A região Sul tem Paraná, Santa Catarina e Rio Grande do Sul."
+  },
+  {
+   "id": "foz-008",
+   "tema": "ciencias",
+   "dificuldade": 1,
+   "pergunta": "Qual é o maior planeta do Sistema Solar?",
+   "alternativas": [
+    "Júpiter",
+    "Saturno",
+    "Terra",
+    "Marte"
+   ],
+   "correta": 0,
+   "explicacao": "Júpiter é o maior planeta do Sistema Solar."
+  },
+  {
+   "id": "foz-009",
+   "tema": "ciencias",
+   "dificuldade": 1,
+   "pergunta": "Qual ave de bico grande e colorido vive nas matas das Cataratas?",
+   "alternativas": [
+    "Tucano",
+    "Pinguim",
+    "Avestruz",
+    "Coruja"
+   ],
+   "correta": 0,
+   "explicacao": "O tucano tem um bico grande e colorido e vive em matas."
+  },
+  {
+   "id": "foz-010",
+   "tema": "ciencias",
+   "dificuldade": 2,
+   "pergunta": "O que as raízes de uma planta fazem?",
+   "alternativas": [
+    "Absorvem água e sais minerais",
+    "Produzem as flores",
+    "Fazem a fotossíntese",
+    "Soltam as sementes"
+   ],
+   "correta": 0,
+   "explicacao": "As raízes prendem a planta e absorvem água e sais minerais."
+  },
+  {
+   "id": "foz-011",
+   "tema": "geografia",
+   "dificuldade": 1,
+   "pergunta": "Qual é a capital do Brasil?",
+   "alternativas": [
+    "Brasília",
+    "Rio de Janeiro",
+    "São Paulo",
+    "Salvador"
+   ],
+   "correta": 0,
+   "explicacao": "A capital federal é Brasília."
+  },
+  {
+   "id": "foz-012",
+   "tema": "geografia",
+   "dificuldade": 1,
+   "pergunta": "Qual destes é um estado da região Sul?",
+   "alternativas": [
+    "Santa Catarina",
+    "Bahia",
+    "Goiás",
+    "Ceará"
+   ],
+   "correta": 0,
+   "explicacao": "Santa Catarina é um dos três estados do Sul."
+  }
+ ],
+ "vf": [
+  {
+   "id": "foz-v01",
+   "tema": "geografia",
+   "pergunta": "Os rios deságuam no mar ou em outros rios.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "Todo rio termina no mar, em um lago ou em outro rio."
+  },
+  {
+   "id": "foz-v02",
+   "tema": "ciencias",
+   "pergunta": "O Sol é uma estrela.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "O Sol é a estrela mais próxima da Terra."
+  },
+  {
+   "id": "foz-v03",
+   "tema": "ciencias",
+   "pergunta": "A Terra é o terceiro planeta a partir do Sol.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "Mercúrio, Vênus e depois a Terra."
+  },
+  {
+   "id": "foz-v04",
+   "tema": "ciencias",
+   "pergunta": "O morcego é uma ave.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 1,
+   "explicacao": "O morcego é um mamífero: tem pelos e amamenta os filhotes."
+  },
+  {
+   "id": "foz-v05",
+   "tema": "ciencias",
+   "pergunta": "A água ferve a 100 °C ao nível do mar.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "A 100 °C, ao nível do mar, a água entra em ebulição."
+  },
+  {
+   "id": "foz-v06",
+   "tema": "geografia",
+   "pergunta": "O Brasil faz fronteira com o Chile.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 1,
+   "explicacao": "O Brasil não tem fronteira com o Chile nem com o Equador."
+  },
+  {
+   "id": "foz-v07",
+   "tema": "ciencias",
+   "pergunta": "A Mata Atlântica é um bioma brasileiro.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 0,
+   "explicacao": "É um dos principais biomas do Brasil."
+  },
+  {
+   "id": "foz-v08",
+   "tema": "ciencias",
+   "pergunta": "A baleia é um peixe.",
+   "alternativas": [
+    "Verdadeiro",
+    "Falso"
+   ],
+   "correta": 1,
+   "explicacao": "A baleia é um mamífero que vive na água."
+  }
+ ]
+}

@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<title>Personagens FAP</title>
+<style>
+  html, body { margin: 0; padding: 0; background: transparent; overflow: hidden; }
+  #root { display: flex; flex-wrap: wrap; width: 2048px; }
+  #root > * { width: 256px; height: 256px; display: block; flex: none; }
+</style>
+</head>
+<body>
+<!--
+  Personagens do jogo FAP em estilo cartoon (recorte / "cutout"), uniforme Educacao Adventista.
+  Uso:  personagens.html?char=menino   ou   ?char=menina
+  Gera uma folha 2048x1280 (quadros 256x256), linhas:
+    0 parado (8)  1 correr (8)  2 pular (2)  3 cair (2)  4 comemorar (6)
+  Os sprites olham para a direita (no Godot, use flip_h para a esquerda).
+-->
+<div id="root"></div>
+<script>
+const q = new URLSearchParams(location.search);
+const NOME = q.get('char') || 'menino';
+
+// ---------- cores ----------
+const C = {
+  ol: '#14213D',      // contorno
+  nv: '#0B3A6E',      // azul-marinho (marca)
+  nvD: '#072B52',     // marinho na sombra (membros de tras)
+  lb: '#7CC6EA',      // azul-claro (debrum)
+  wh: '#F8FAFC',      // branco da camisa
+  mouth: '#7A2630', tongue: '#E2717A', blush: '#F27D7D'
+};
+const CH = {
+  menino: { skin: '#E8B088', skinS: '#C98A62', hair: '#4E3220', hairL: '#80583A', iris: '#6B4426', girl: false },
+  menina: { skin: '#F6CEAF', skinS: '#DDA684', hair: '#3B2418', hairL: '#74503A', iris: '#5B3A22', girl: true }
+}[NOME];
+const OW = 3.5; // espessura do contorno
+
+// ---------- formas base (coordenadas locais) ----------
+const TORSO = 'M -27,6 C -28,-10 -29,-28 -27,-38 C -25,-48 -15,-52 0,-52 C 15,-52 25,-48 27,-38 C 29,-28 28,-10 27,6 C 11,9 -11,9 -27,6 Z';
+const FACE  = 'M -40,2 C -41,-28 -20,-44 4,-44 C 30,-44 45,-26 45,0 C 45,22 34,38 12,41 C -10,44 -30,36 -37,22 C -40,15 -40,9 -40,2 Z';
+const HAIR_BOY = 'M -42,12 C -48,-14 -40,-44 -12,-52 C 14,-58 40,-48 47,-26 L 42,-22 L 45,-11 L 33,-19 L 31,-10 L 22,-21 L 17,-11 L 9,-22 L 2,-12 L -4,-23 C -10,-17 -17,-13 -21,-7 C -25,-2 -27,4 -28,12 L -31,16 C -36,18 -41,17 -42,12 Z';
+const HAIR_GIRL = 'M -42,14 C -50,-14 -40,-46 -10,-53 C 16,-58 42,-46 47,-22 C 46,-14 42,-8 37,-4 C 36,-11 32,-16 27,-18 C 22,-11 14,-8 5,-8 C 9,-12 4,-17 -3,-20 C -9,-14 -17,-10 -21,-4 C -25,2 -27,9 -27,18 C -28,25 -32,29 -37,27 C -42,25 -42,19 -42,14 Z';
+const PONY = 'M 2,-4 C -12,-6 -22,10 -22,28 C -22,46 -14,60 -2,68 C -6,56 -6,44 -2,34 C 2,46 6,52 12,56 C 8,44 8,28 6,16 C 5,6 6,0 2,-4 Z';
+
+const ln = (x1, y1, x2, y2, w, c) =>
+  `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`;
+const S = 'stroke-linejoin="round" stroke-linecap="round"';
+
+// ---------- membros (passada 'o' = contorno, 'f' = preenchimento) ----------
+function arm(a, f, back, pass) {
+  const skin = back ? CH.skinS : CH.skin, sl = back ? C.nvD : C.nv;
+  const L1 = 21, L2 = 18, W1 = 14, W2 = 12, R = 7.5, o = pass === 'o';
+  const col = c => o ? C.ol : c, w = x => o ? x + OW * 2 : x;
+  let s = `<g transform="rotate(${a})">${ln(0, 0, 0, L1, w(W1), col(skin))}
+    <g transform="translate(0,${L1}) rotate(${f})">${ln(0, 0, 0, L2, w(W2), col(skin))}
+      <circle cx="0" cy="${L2 + 3}" r="${o ? R + OW : R}" fill="${col(skin)}"/></g>`;
+  if (!o) s += `<path d="M -10,-6 C -10,-13 10,-13 10,-6 L 10,12 C 4,15 -4,15 -10,12 Z" fill="${sl}" stroke="${C.ol}" stroke-width="3" ${S}/>
+     <path d="M -8.5,10 C -3,12.5 3,12.5 8.5,10" stroke="${C.lb}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
+  return s + '</g>';
+}
+
+function shoe(back) {
+  const up = back ? '#D5DEE8' : C.wh;
+  return `<path d="M -12,5 L 25,5 C 27,5 28,7 28,9 C 28,11 26,12 24,12 L -10,12 C -13,12 -14,9 -12,5 Z" fill="${back ? '#5D9FC4' : C.lb}" stroke="${C.ol}" stroke-width="3" ${S}/>
+  <path d="M -11,6 C -12,-4 -6,-10 2,-9 C 8,-8 10,-4 14,-2 C 22,0 27,2 27,6 Z" fill="${up}" stroke="${C.ol}" stroke-width="3" ${S}/>
+  <path d="M -5,1 C 1,-1.5 8,-0.5 14,3" stroke="${back ? C.nvD : C.nv}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+}
+
+function leg(a, k, ft, back, pass) {
+  const pc = back ? C.nvD : C.nv, o = pass === 'o';
+  const L1 = 24, L2 = 22, W1 = 18, W2 = 16;
+  const col = c => o ? C.ol : c, w = x => o ? x + OW * 2 : x;
+  let s = `<g transform="rotate(${a})">${ln(0, 0, 0, L1, w(W1), col(pc))}`;
+  if (!o) s += ln(-4.5, 3, -4.5, L1, 2.2, C.lb);
+  s += `<g transform="translate(0,${L1}) rotate(${k})">${ln(0, 0, 0, L2, w(W2), col(pc))}`;
+  if (!o) s += ln(-4, 1, -4, L2 - 2, 2.2, C.lb) +
+    `<g transform="translate(0,${L2 + 2}) rotate(${-(a + k) + ft})">${shoe(back)}</g>`;
+  return s + '</g></g>';
+}
+
+// ---------- tronco ----------
+function torsoFront() {
+  return `
+  <rect x="-6" y="-64" width="15" height="18" rx="5" fill="${CH.skinS}" stroke="${C.ol}" stroke-width="3"/>
+  <path d="${TORSO}" fill="${C.wh}"/>
+  <g clip-path="url(#clipTorso)">
+    <rect x="-30" y="-56" width="60" height="68" fill="url(#gShirt)"/>
+    <path d="M -40,-60 L -21,-52 C -17,-40 -17,-26 -18,-12 C -19,-4 -18,2 -17,12 L -40,12 Z" fill="${C.nv}"/>
+    <path d="M -21,-52 C -17,-40 -17,-26 -18,-12 C -19,-4 -18,2 -17,12" stroke="${C.lb}" stroke-width="2.6" fill="none"/>
+    <ellipse cx="4" cy="-50" rx="20" ry="7" fill="${C.ol}" opacity=".13"/>
+    <path d="M -28,2 C -10,6 10,6 28,2" stroke="${C.lb}" stroke-width="2.4" fill="none"/>
+  </g>
+  <path d="${TORSO}" fill="none" stroke="${C.ol}" stroke-width="${OW}" ${S}/>
+  <path d="M -12,-51 C -6,-44 6,-44 13,-51" stroke="${C.nv}" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M -9.5,-47 C -4,-42.5 4.5,-42.5 10.5,-47" stroke="${C.lb}" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+  <g transform="translate(13,-30)">
+    <path d="M -5,7 L -1.2,-6 L 1.6,-6 L 5.4,7 L 3,7 L 0.2,-2.5 L -2.6,7 Z" fill="${C.nv}"/>
+    <path d="M -7,3 C -2,1 3,0 8,-2.6" stroke="${C.nv}" stroke-width="1.3" fill="none"/>
+    <path d="M -7,5 C -2,3 3,2 8,-0.6" stroke="${C.nv}" stroke-width="1.1" fill="none"/>
+    <rect x="-7" y="9" width="14" height="1.4" fill="${C.nv}" opacity=".7"/>
+    <rect x="-6" y="11.5" width="12" height="1.2" fill="${C.nv}" opacity=".7"/>
+  </g>`;
+}
+
+// ---------- cabeca ----------
+const HEAD = p => `translate(3,-54) rotate(${p.hr}) translate(0,-42) scale(1.1)`;
+
+function headBack(p) {
+  if (!CH.girl) return '';
+  return `<g transform="translate(-36,-22) rotate(${p.pony})">
+    <path d="${PONY}" fill="${CH.hair}" stroke="${C.ol}" stroke-width="${OW}" ${S}/>
+    <path d="M -14,10 C -16,22 -14,34 -10,44" stroke="${CH.hairL}" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8"/>
+  </g>`;
+}
+
+function eye(cx, cy, rx, ry, far) {
+  const ix = cx + 2, iy = cy + 2;
+  return `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#fff"/>
+    <ellipse cx="${ix}" cy="${iy}" rx="${rx * 0.82}" ry="${ry * 0.86}" fill="${CH.iris}"/>
+    <ellipse cx="${ix}" cy="${iy - ry * 0.38}" rx="${rx * 0.8}" ry="${ry * 0.34}" fill="#000" opacity=".2"/>
+    <ellipse cx="${ix + 0.5}" cy="${iy + 1}" rx="${rx * 0.42}" ry="${ry * 0.48}" fill="#120d0a"/>
+    <path d="M ${cx - rx * 0.6},${cy + ry * 0.9} Q ${cx},${cy + ry * 1.12} ${cx + rx * 0.6},${cy + ry * 0.9}" stroke="${C.ol}" stroke-width="1.4" fill="none" opacity=".5" stroke-linecap="round"/>
+    <circle cx="${ix + rx * 0.35}" cy="${iy - ry * 0.4}" r="${far ? 2.2 : 2.7}" fill="#fff"/>
+    <circle cx="${ix - rx * 0.2}" cy="${iy + ry * 0.4}" r="1.2" fill="#fff"/>
+    <path d="M ${cx - rx - 1},${cy - 3} Q ${cx - rx * 0.4},${cy - ry - 1.5} ${cx + 1},${cy - ry - 0.5} Q ${cx + rx * 0.8},${cy - ry} ${cx + rx + 1.5},${cy - 4}"
+      stroke="${C.ol}" stroke-width="${CH.girl ? 4 : 3.4}" fill="none" stroke-linecap="round"/>
+    ${CH.girl ? (far
+      ? `<path d="M ${cx - rx},${cy - 4} L ${cx - rx - 4},${cy - 7}" stroke="${C.ol}" stroke-width="2.4" stroke-linecap="round"/>`
+      : `<path d="M ${cx + rx + 1},${cy - 4} L ${cx + rx + 5},${cy - 8} M ${cx + rx + 1.5},${cy - 1} L ${cx + rx + 6},${cy - 3}" stroke="${C.ol}" stroke-width="2.4" stroke-linecap="round"/>`) : ''}`;
+}
+
+function eyes(p) {
+  const st = `stroke="${C.ol}" stroke-width="3.4" fill="none" stroke-linecap="round"`;
+  if (p.eyes === 'closed')
+    return `<path d="M 17,11 Q 25,15 33,11" ${st}/><path d="M -3,11 Q 3,14 10,11" ${st}/>`;
+  if (p.eyes === 'happy')
+    return `<path d="M 17,13 Q 25,3 33,13" ${st}/><path d="M -3,13 Q 3,4 10,13" ${st}/>`;
+  return eye(3, 10, 7, 10.5, true) + eye(25, 10, 8.5, 11, false);
+}
+
+function mouth(p) {
+  if (p.mouth === 'open')
+    return `<path d="M 21,26 Q 29,41 37,25 Q 29,29 21,26 Z" fill="${C.mouth}" stroke="${C.ol}" stroke-width="2.2" ${S}/>
+            <path d="M 25,33 Q 29,37 33,31 Q 29,33.5 25,33 Z" fill="${C.tongue}"/>`;
+  if (p.mouth === 'o')
+    return `<ellipse cx="30" cy="29" rx="3.6" ry="4.6" fill="${C.mouth}" stroke="${C.ol}" stroke-width="2"/>`;
+  return `<path d="M 22,28 Q 29,33.5 35,27" stroke="${C.mouth}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+}
+
+function headFront(p) {
+  const HAIR = CH.girl ? HAIR_GIRL : HAIR_BOY;
+  const ear = `<ellipse cx="-30" cy="8" rx="8" ry="10" fill="${CH.skin}" stroke="${C.ol}" stroke-width="3"/>
+               <path d="M -31,3 Q -25.5,8 -31,13" stroke="${CH.skinS}" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
+  return `
+  <path d="${FACE}" fill="${CH.skin}"/>
+  <g clip-path="url(#clipFace)">
+    <path d="M -46,-10 C -36,-4 -34,22 -18,44 L -50,50 Z" fill="${CH.skinS}" opacity=".45"/>
+    <path d="${HAIR}" transform="translate(2,5)" fill="${CH.skinS}" opacity=".7"/>
+  </g>
+  <path d="${FACE}" fill="none" stroke="${C.ol}" stroke-width="${OW}" ${S}/>
+  <ellipse cx="34" cy="23" rx="6" ry="3.5" fill="${C.blush}" opacity=".45"/>
+  <ellipse cx="7" cy="23" rx="5" ry="3" fill="${C.blush}" opacity=".4"/>
+  ${eyes(p)}
+  <path d="M 40,14 Q 44.5,17 40,20.5" stroke="${CH.skinS}" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  ${mouth(p)}
+  ${CH.girl ? ear : ''}
+  <path d="${HAIR}" fill="${CH.hair}" stroke="${C.ol}" stroke-width="${OW}" ${S}/>
+  <path d="M -30,-34 C -18,-46 4,-51 24,-46" stroke="${CH.hairL}" stroke-width="5" fill="none" stroke-linecap="round" opacity=".85"/>
+  <path d="M -38,-14 C -38,-22 -35,-28 -31,-32" stroke="${CH.hairL}" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".6"/>
+  ${CH.girl ? `<circle cx="-36" cy="-22" r="5.5" fill="${C.nv}" stroke="${C.ol}" stroke-width="2.6"/>` : ear}
+  <path d="M 17,-6 Q 25,-11 33,-7" stroke="${CH.hair}" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+  <path d="M -4,-6 Q 2,-10 9,-7" stroke="${CH.hair}" stroke-width="3.2" fill="none" stroke-linecap="round"/>`;
+}
+
+// ---------- quadro completo ----------
+function frameSVG(p) {
+  const T = `translate(0,${p.by}) rotate(${p.tr})`;
+  return `<svg viewBox="0 0 256 256" width="256" height="256" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(128,244) scale(${p.sq[0]},${p.sq[1]}) translate(-128,-244)">
+  <g transform="translate(122,${184 + p.y})">
+    <g transform="${T}">
+      <g transform="translate(-10,-41)">${arm(p.aB, p.fB, true, 'o')}${arm(p.aB, p.fB, true, 'f')}</g>
+      <g transform="${HEAD(p)}">${headBack(p)}</g>
+    </g>
+    <g transform="translate(-7,0)">${leg(p.lB, p.kB, p.ftB, true, 'o')}${leg(p.lB, p.kB, p.ftB, true, 'f')}</g>
+    <g transform="translate(7,0)">${leg(p.lF, p.kF, p.ftF, false, 'o')}${leg(p.lF, p.kF, p.ftF, false, 'f')}</g>
+    <g transform="${T}">
+      ${torsoFront()}
+      <g transform="${HEAD(p)}">${headFront(p)}</g>
+      <g transform="translate(12,-40)">${arm(p.aF, p.fF, false, 'o')}${arm(p.aF, p.fF, false, 'f')}</g>
+    </g>
+  </g></g></svg>`;
+}
+
+// ---------- animacoes ----------
+const BASE = { y: 0, by: 0, tr: 0, hr: 0, aF: 4, fF: -10, aB: -4, fB: -14, lF: -3, kF: 3, lB: 4, kB: 3,
+  ftF: 0, ftB: 0, pony: 12, mouth: 'smile', eyes: 'open', sq: [1, 1] };
+const P = o => Object.assign({}, BASE, o);
+const sin = Math.sin, cos = Math.cos, PI = Math.PI, max = Math.max;
+
+const ANIMS = [
+  ['parado', [...Array(8)].map((_, i) => { const t = 2 * PI * i / 8;
+    return P({ by: 1.2 * (1 - cos(t)), hr: 1.5 * sin(t), aF: 6 + 2.5 * sin(t), aB: -4 - 2 * sin(t),
+      fF: -12 - 3 * sin(t), pony: 12 + 3 * sin(t), eyes: i === 5 ? 'closed' : 'open' }); })],
+  ['correr', [...Array(8)].map((_, i) => { const p = 2 * PI * i / 8, s = sin(p), c = cos(p);
+    return P({ y: 2 - 5 * Math.abs(s), tr: 9, hr: -7, lF: -5 - 38 * s, lB: -5 + 38 * s,
+      kF: 10 + 65 * max(0, c), kB: 10 + 65 * max(0, -c), ftF: 22 * max(0, c), ftB: 22 * max(0, -c),
+      aF: 10 + 45 * s, aB: 10 - 45 * s, fF: -80, fB: -80, pony: 30 + 8 * sin(2 * p) }); })],
+  ['pular', [
+    P({ y: -2, tr: 4, hr: -8, lF: -50, kF: 85, lB: 18, kB: 45, ftF: 15, ftB: 25, aF: -114, fF: -8, aB: 45, fB: -35, pony: 4, mouth: 'open' }),
+    P({ y: -3, tr: 4, hr: -8, lF: -55, kF: 90, lB: 22, kB: 50, ftF: 15, ftB: 28, aF: -120, fF: -6, aB: 52, fB: -30, pony: 0, mouth: 'open' })]],
+  ['cair', [
+    P({ y: -2, tr: -2, hr: -4, lF: -18, kF: 35, lB: 12, kB: 25, ftF: 18, ftB: 22, aF: -80, fF: -25, aB: 130, fB: 15, pony: 55, mouth: 'o' }),
+    P({ y: -2, tr: -2, hr: -4, lF: -14, kF: 30, lB: 15, kB: 22, ftF: 20, ftB: 22, aF: -88, fF: -20, aB: 138, fB: 10, pony: 65, mouth: 'o' })]],
+  ['comemorar', [...Array(6)].map((_, i) => { const t = i / 6, h = sin(PI * t);
+    return P({ y: -10 * h, hr: -6, aF: -100, fF: -55 - 15 * sin(2 * PI * t), aB: 125 + 10 * sin(2 * PI * t), fB: 15,
+      lF: -6, kF: 20 * h, lB: 8, kB: 35 * h, ftB: 10 * h, pony: 12 + 40 * h, mouth: 'open', eyes: 'happy',
+      sq: i === 0 ? [1.06, 0.94] : [1, 1] }); })]
+];
+
+// ---------- montagem da folha ----------
+const defs = `<svg width="0" height="0" style="position:absolute;width:0;height:0"><defs>
+  <clipPath id="clipTorso"><path d="${TORSO}"/></clipPath>
+  <clipPath id="clipFace"><path d="${FACE}"/></clipPath>
+  <linearGradient id="gShirt" x1="0" x2="1" y1="0" y2="0">
+    <stop offset="0" stop-color="${C.ol}" stop-opacity=".2"/><stop offset=".5" stop-color="${C.ol}" stop-opacity="0"/>
+  </linearGradient></defs></svg>`;
+document.body.insertAdjacentHTML('afterbegin', defs);
+let html = '';
+for (const [, frames] of ANIMS) {
+  for (let i = 0; i < 8; i++) html += frames[i] ? frameSVG(frames[i]) : '<div></div>';
+}
+document.getElementById('root').innerHTML = html;
+</script>
+</body>
+</html>
