@@ -1,5 +1,9 @@
 class_name TelaPausa
 extends TelaCheia
+
+signal retomou
+signal reiniciou
+signal foi_ao_mapa
 ## Tela de pausa: título e a lista de teclas (ou botões do controle).
 
 
@@ -12,8 +16,19 @@ func _init() -> void:
 	var sub := Estilos.rotulo("Respire, estude e volte com tudo!", 30, Paleta.CLARO, false)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	coluna.add_child(sub)
-	for par in _atalhos():
-		coluna.add_child(_linha_atalho(par[0], par[1]))
+	if ControlesToque.deve_aparecer():
+		_criar_botoes(coluna)
+	else:
+		for par in _atalhos():
+			coluna.add_child(_linha_atalho(par[0], par[1]))
+
+
+func _criar_botoes(coluna: VBoxContainer) -> void:
+	for item in [["Continuar", retomou], ["Reiniciar a fase", reiniciou], ["Voltar ao mapa", foi_ao_mapa]]:
+		var botao := Estilos.botao(item[0], 42)
+		botao.custom_minimum_size = Vector2(0, 96)
+		botao.pressed.connect(func(): item[1].emit())
+		coluna.add_child(botao)
 
 
 func _atalhos() -> Array:
