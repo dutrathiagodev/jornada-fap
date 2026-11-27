@@ -7,13 +7,6 @@ const Jogador := preload("res://scripts/jogador.gd")
 const TEMPO_PERGUNTA := 20.0
 const DWELL := 0.7
 
-const AZUL := Color("#0B3A6E")
-const AZUL_MEDIO := Color("#1B5AA6")
-const CLARO := Color("#7CC6EA")
-const OURO := Color("#FFD34E")
-const NOITE := Color("#14213D")
-const VERDE := Color("#3DBE6C")
-const VERMELHO := Color("#E63946")
 
 var cid: Dictionary
 var idx := 0
@@ -79,7 +72,7 @@ var coracoes
 var lbl_moedas: Label
 var lbl_pontos: Label
 var lbl_fase: Label
-var tela_perg: Control
+var tela_perg: TelaCheia
 var painel_perg: PanelContainer
 var estilo_botao := {}
 var fundo_perg: TextureRect
@@ -95,12 +88,8 @@ var aviso_painel: PanelContainer
 var aviso_lbl: Label
 var banner: PanelContainer
 var banner_lbl: Label
-var tela_fim: Control
-var fim_titulo: Label
-var fim_estrelas: Label
-var fim_texto: Label
-var fim_dica: Label
-var tela_pausa: Control
+var tela_fim: TelaFim
+var tela_pausa: TelaPausa
 var flash: ColorRect
 var toque: ControlesToque       # botões na tela (só em aparelhos de toque)
 
@@ -364,7 +353,7 @@ func _caminho() -> void:
 func _checkpoint(x: float) -> void:
 	var cp := Bandeira.new()
 	cp.position = Vector2(x, chao_y)
-	cp.cor = CLARO
+	cp.cor = Paleta.CLARO
 	cp.escala = 0.6
 	mundo.add_child(cp)
 	var a := _area(Vector2(x, chao_y - 100), Vector2(120, 260))
@@ -393,34 +382,11 @@ func _placa(texto: String, pos: Vector2) -> void:
 	l.position = pos
 	l.add_theme_font_size_override("font_size", 28)
 	l.add_theme_color_override("font_color", Color.WHITE)
-	l.add_theme_stylebox_override("normal", _estilo(Color(0.04, 0.23, 0.43, 0.88), 18, CLARO, 4, 18))
+	l.add_theme_stylebox_override("normal", Estilos.caixa(Color(0.04, 0.23, 0.43, 0.88), 18, Paleta.CLARO, 4, 18))
 	mundo.add_child(l)
 
 
 # ====================================================================== interface
-func _estilo(cor: Color, raio := 16, borda := Color.TRANSPARENT, larg_borda := 0, margem := 0) -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = cor
-	s.set_corner_radius_all(raio)
-	if larg_borda > 0:
-		s.border_color = borda
-		s.set_border_width_all(larg_borda)
-	if margem > 0:
-		s.set_content_margin_all(margem)
-	return s
-
-
-func _rotulo(texto: String, tam: int, cor := Color.WHITE, contorno := true) -> Label:
-	var l := Label.new()
-	l.text = texto
-	l.add_theme_font_size_override("font_size", tam)
-	l.add_theme_color_override("font_color", cor)
-	if contorno:
-		l.add_theme_color_override("font_outline_color", NOITE)
-		l.add_theme_constant_override("outline_size", 10)
-	return l
-
-
 func _criar_ui() -> void:
 	ui = CanvasLayer.new()
 	ui.layer = 10
@@ -443,24 +409,24 @@ func _criar_ui() -> void:
 	ico.position = Vector2(36, 108)
 	ico.size = Vector2(52, 52)
 	ui.add_child(ico)
-	lbl_moedas = _rotulo("× 0", 44, OURO)
+	lbl_moedas = Estilos.rotulo("× 0", 44, Paleta.OURO)
 	lbl_moedas.position = Vector2(98, 100)
 	ui.add_child(lbl_moedas)
 	var cartao := Panel.new()
 	cartao.position = Vector2(1920 - 400, 18)
 	cartao.size = Vector2(370, 128)
-	cartao.add_theme_stylebox_override("panel", _caixa_botao("azul"))
+	cartao.add_theme_stylebox_override("panel", Estilos.caixa_botao("azul"))
 	ui.add_child(cartao)
-	lbl_pontos = _rotulo("0", 64, OURO)
+	lbl_pontos = Estilos.rotulo("0", 64, Paleta.OURO)
 	lbl_pontos.position = Vector2(20, 2)
 	lbl_pontos.size = Vector2(215, 76)
 	lbl_pontos.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	lbl_pontos.add_theme_constant_override("outline_size", 8)
 	cartao.add_child(lbl_pontos)
-	var pts := _rotulo("PONTOS", 22, Color("#BFE8FF"), false)
+	var pts := Estilos.rotulo("PONTOS", 22, Color("#BFE8FF"), false)
 	pts.position = Vector2(244, 38)
 	cartao.add_child(pts)
-	lbl_fase = _rotulo("Fase %d · %s" % [idx + 1, cid["nome"]], 26, Color.WHITE)
+	lbl_fase = Estilos.rotulo("Fase %d · %s" % [idx + 1, cid["nome"]], 26, Color.WHITE)
 	lbl_fase.position = Vector2(30, 78)
 	lbl_fase.size = Vector2(310, 36)
 	lbl_fase.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -486,18 +452,18 @@ func _criar_ui() -> void:
 	aviso_painel.position = Vector2(360, 118)
 	aviso_painel.custom_minimum_size = Vector2(1200, 0)
 	aviso_painel.visible = false
-	aviso_lbl = _rotulo("", 32, Color.WHITE, false)
+	aviso_lbl = Estilos.rotulo("", 32, Color.WHITE, false)
 	aviso_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	aviso_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	aviso_painel.add_child(aviso_lbl)
 	ui.add_child(aviso_painel)
 
 	banner = PanelContainer.new()
-	banner.add_theme_stylebox_override("panel", _estilo(Color(1, 0.83, 0.3, 0.96), 22, NOITE, 5, 18))
+	banner.add_theme_stylebox_override("panel", Estilos.caixa(Color(1, 0.83, 0.3, 0.96), 22, Paleta.NOITE, 5, 18))
 	banner.position = Vector2(360, 118)
 	banner.custom_minimum_size = Vector2(1200, 0)
 	banner.visible = false
-	banner_lbl = _rotulo("", 36, NOITE, false)
+	banner_lbl = Estilos.rotulo("", 36, Paleta.NOITE, false)
 	banner_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	banner_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	banner.add_child(banner_lbl)
@@ -509,8 +475,10 @@ func _criar_ui() -> void:
 		ui.add_child(toque)
 
 	_criar_tela_pergunta()
-	_criar_tela_fim()
-	_criar_tela_pausa()
+	tela_fim = TelaFim.new()
+	ui.add_child(tela_fim)
+	tela_pausa = TelaPausa.new()
+	ui.add_child(tela_pausa)
 	# HUD fica por cima do escurecimento das telas (não "apaga" os pontos)
 	for n in [coracoes, ico, lbl_moedas, cartao, hud_prog]:
 		if n.get_parent() == ui:
@@ -519,50 +487,9 @@ func _criar_ui() -> void:
 		get_tree().create_timer(1.0).timeout.connect(_pausar)
 
 
-func _painel_arte() -> StyleBoxTexture:
-	var sp := StyleBoxTexture.new()
-	sp.texture = load("res://assets/ui/painel.png")
-	sp.texture_margin_left = 62
-	sp.texture_margin_right = 62
-	sp.texture_margin_top = 58
-	sp.texture_margin_bottom = 58
-	sp.set_content_margin_all(64)
-	return sp
-
-
-func _caixa_botao(tipo: String, tom := Color.WHITE) -> StyleBoxTexture:
-	var sb := StyleBoxTexture.new()
-	sb.texture = load("res://assets/ui/botao_%s.png" % tipo)
-	sb.texture_margin_left = 46
-	sb.texture_margin_right = 46
-	sb.texture_margin_top = 34
-	sb.texture_margin_bottom = 34
-	sb.content_margin_left = 40
-	sb.content_margin_right = 30
-	sb.content_margin_top = 10
-	sb.content_margin_bottom = 10
-	sb.modulate_color = tom
-	return sb
-
-
-func _tela_cheia(escuro: float) -> Control:
-	var t := Control.new()
-	t.set_anchors_preset(Control.PRESET_FULL_RECT)
-	t.visible = false
-	var fundo := ColorRect.new()
-	fundo.color = Color(0.02, 0.06, 0.14, escuro)
-	fundo.set_anchors_preset(Control.PRESET_FULL_RECT)
-	t.add_child(fundo)
-	var centro := CenterContainer.new()
-	centro.set_anchors_preset(Control.PRESET_FULL_RECT)
-	centro.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	t.add_child(centro)
-	ui.add_child(t)
-	return t
-
-
 func _criar_tela_pergunta() -> void:
-	tela_perg = _tela_cheia(0.45)
+	tela_perg = TelaCheia.new(0.45)
+	ui.add_child(tela_perg)
 	fundo_perg = TextureRect.new()
 	fundo_perg.texture = load("res://assets/%s/2_meio.png" % cid["id"])
 	fundo_perg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -583,15 +510,15 @@ func _criar_tela_pergunta() -> void:
 	sp.set_content_margin_all(60)
 	painel.add_theme_stylebox_override("panel", sp)
 	painel.custom_minimum_size = Vector2(1400, 0)
-	tela_perg.get_child(2).add_child(painel)
+	tela_perg.centro.add_child(painel)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 16)
 	painel.add_child(v)
 	var cab := HBoxContainer.new()
 	cab.add_theme_constant_override("separation", 20)
 	v.add_child(cab)
-	lbl_tema = _rotulo("", 28, CLARO, false)
-	lbl_tema.add_theme_stylebox_override("normal", _estilo(Color(0.1, 0.35, 0.65), 22, Color(1, 1, 1, 0.5), 3, 14))
+	lbl_tema = Estilos.rotulo("", 28, Paleta.CLARO, false)
+	lbl_tema.add_theme_stylebox_override("normal", Estilos.caixa(Color(0.1, 0.35, 0.65), 22, Color(1, 1, 1, 0.5), 3, 14))
 	lbl_tema.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	lbl_tema.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	cab.add_child(lbl_tema)
@@ -617,7 +544,7 @@ func _criar_tela_pergunta() -> void:
 	sbp.content_margin_bottom = 26
 	placa.add_theme_stylebox_override("panel", sbp)
 	v.add_child(placa)
-	lbl_perg = _rotulo("", 58, Color.WHITE, false)
+	lbl_perg = Estilos.rotulo("", 58, Color.WHITE, false)
 	lbl_perg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	lbl_perg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	placa.add_child(lbl_perg)
@@ -629,10 +556,10 @@ func _criar_tela_pergunta() -> void:
 		b.add_theme_color_override("font_color", Color.WHITE)
 		b.add_theme_color_override("font_hover_color", Color.WHITE)
 		b.add_theme_color_override("font_disabled_color", Color.WHITE)
-		b.add_theme_stylebox_override("normal", _caixa_botao("azul"))
-		b.add_theme_stylebox_override("hover", _caixa_botao("dourado"))
-		b.add_theme_stylebox_override("pressed", _caixa_botao("dourado"))
-		b.add_theme_stylebox_override("disabled", _caixa_botao("azul"))
+		b.add_theme_stylebox_override("normal", Estilos.caixa_botao("azul"))
+		b.add_theme_stylebox_override("hover", Estilos.caixa_botao("dourado"))
+		b.add_theme_stylebox_override("pressed", Estilos.caixa_botao("dourado"))
+		b.add_theme_stylebox_override("disabled", Estilos.caixa_botao("azul"))
 		b.add_theme_color_override("font_hover_color", Color("#14213D"))
 		b.add_theme_color_override("font_pressed_color", Color("#14213D"))
 		b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
@@ -643,96 +570,19 @@ func _criar_tela_pergunta() -> void:
 	barra.custom_minimum_size = Vector2(0, 22)
 	barra.show_percentage = false
 	barra.max_value = TEMPO_PERGUNTA
-	barra.add_theme_stylebox_override("background", _estilo(Color(0, 0, 0, 0.35), 11, Color(1, 1, 1, 0.25), 2))
-	fill_tempo = _estilo(VERDE, 11)
+	barra.add_theme_stylebox_override("background", Estilos.caixa(Color(0, 0, 0, 0.35), 11, Color(1, 1, 1, 0.25), 2))
+	fill_tempo = Estilos.caixa(Paleta.VERDE, 11)
 	barra.add_theme_stylebox_override("fill", fill_tempo)
 	v.add_child(barra)
-	var dica_perg := _rotulo(Jogo.dica("↑ ↓ escolher     Enter confirmar     (ou tecla 1 a 4)", "Direcional: escolher     A: confirmar", "Direcional: escolher     Cruz: confirmar"), 24, Color(1, 1, 1, 0.7), false)
+	var dica_perg := Estilos.rotulo(Jogo.dica("↑ ↓ escolher     Enter confirmar     (ou tecla 1 a 4)", "Direcional: escolher     A: confirmar", "Direcional: escolher     Cruz: confirmar"), 24, Color(1, 1, 1, 0.7), false)
 	dica_perg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(dica_perg)
-	lbl_feed = _rotulo("", 32, Color.WHITE, false)
+	lbl_feed = Estilos.rotulo("", 32, Color.WHITE, false)
 	lbl_feed.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(lbl_feed)
-	lbl_cont = _rotulo(Jogo.dica("Aperte ENTER para continuar (ou toque na tela)", "Aperte A para continuar", "Aperte Cruz para continuar"), 28, OURO, false)
+	lbl_cont = Estilos.rotulo(Jogo.dica("Aperte ENTER para continuar (ou toque na tela)", "Aperte A para continuar", "Aperte Cruz para continuar"), 28, Paleta.OURO, false)
 	lbl_cont.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	v.add_child(lbl_cont)
-
-
-func _criar_tela_fim() -> void:
-	tela_fim = _tela_cheia(0.7)
-	var painel := PanelContainer.new()
-	painel.add_theme_stylebox_override("panel", _painel_arte())
-	painel.custom_minimum_size = Vector2(1200, 0)
-	tela_fim.get_child(1).add_child(painel)
-	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 18)
-	painel.add_child(v)
-	fim_titulo = _rotulo("", 64, Color.WHITE)
-	fim_titulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(fim_titulo)
-	fim_estrelas = _rotulo("", 110, OURO)
-	fim_estrelas.visible = false
-	v.add_child(fim_estrelas)
-	fim_ctl = Estrelas.new()
-	fim_ctl.raio = 92.0
-	fim_ctl.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	v.add_child(fim_ctl)
-	fim_texto = _rotulo("", 34, Color.WHITE, false)
-	fim_texto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	fim_texto.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(fim_texto)
-	fim_dica = _rotulo("", 28, CLARO, false)
-	fim_dica.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	fim_dica.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(fim_dica)
-	var dica := _rotulo(Jogo.dica("Enter: continuar     M: mapa", "A: continuar     Y: mapa", "Cruz: continuar     Triângulo: mapa"), 30, OURO, false)
-	dica.name = "dica_teclas"
-	dica.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(dica)
-
-
-func _criar_tela_pausa() -> void:
-	tela_pausa = _tela_cheia(0.6)
-	var painel := PanelContainer.new()
-	painel.add_theme_stylebox_override("panel", _painel_arte())
-	painel.custom_minimum_size = Vector2(900, 0)
-	tela_pausa.get_child(1).add_child(painel)
-	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 20)
-	painel.add_child(v)
-	var t := _rotulo("Pausado", 84, OURO)
-	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(t)
-	var ic := Label.new()
-	ic.text = "Respire, estude e volte com tudo!"
-	ic.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ic.add_theme_font_size_override("font_size", 30)
-	ic.add_theme_color_override("font_color", CLARO)
-	v.add_child(ic)
-	for par in [[Jogo.dica("Enter", "A", "Cruz"), "continuar"], [Jogo.dica("R", "X", "Quadrado"), "reiniciar a fase"], [Jogo.dica("M", "Y", "Triângulo"), "voltar ao mapa"], ["N", "música liga/desliga"]]:
-		var linha := HBoxContainer.new()
-		linha.add_theme_constant_override("separation", 24)
-		linha.alignment = BoxContainer.ALIGNMENT_CENTER
-		var tecla := Label.new()
-		tecla.text = par[0]
-		tecla.custom_minimum_size = Vector2(190, 70)
-		tecla.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		tecla.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		tecla.add_theme_font_size_override("font_size", 38)
-		tecla.add_theme_color_override("font_color", NOITE)
-		var sk := StyleBoxFlat.new()
-		sk.bg_color = Color("#FFF2C6")
-		sk.set_corner_radius_all(16)
-		sk.border_color = Color("#C9A227")
-		sk.set_border_width_all(4)
-		sk.border_width_bottom = 10
-		tecla.add_theme_stylebox_override("normal", sk)
-		linha.add_child(tecla)
-		var txt := _rotulo(par[1], 42, Color.WHITE, false)
-		txt.custom_minimum_size = Vector2(380, 70)
-		txt.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		linha.add_child(txt)
-		v.add_child(linha)
 
 
 func _atualizar_hud() -> void:
@@ -745,7 +595,7 @@ func _atualizar_hud() -> void:
 func aviso(texto: String, dur := 3.0, erro := false) -> void:
 	aviso_id += 1
 	var meu := aviso_id
-	aviso_painel.add_theme_stylebox_override("panel", _estilo(Color(0.55, 0.08, 0.12, 0.96) if erro else Color(0.04, 0.23, 0.43, 0.93), 22, Color.WHITE if erro else CLARO, 4, 20))
+	aviso_painel.add_theme_stylebox_override("panel", Estilos.caixa(Color(0.55, 0.08, 0.12, 0.96) if erro else Color(0.04, 0.23, 0.43, 0.93), 22, Color.WHITE if erro else Paleta.CLARO, 4, 20))
 	aviso_lbl.text = texto
 	aviso_painel.visible = true
 	aviso_painel.modulate.a = 0.0
@@ -799,8 +649,8 @@ func _particulas(pos: Vector2, cor: Color, qtd: int, vel: float, vida := 0.5, gr
 	get_tree().create_timer(vida + 0.3).timeout.connect(c.queue_free)
 
 
-func _texto_flutuante(texto: String, pos: Vector2, cor := OURO) -> void:
-	var l := _rotulo(texto, 44, cor)
+func _texto_flutuante(texto: String, pos: Vector2, cor := Paleta.OURO) -> void:
+	var l := Estilos.rotulo(texto, 44, cor)
 	l.position = pos - Vector2(40, 40)
 	mundo.add_child(l)
 	var tw := create_tween().set_parallel(true)
@@ -823,7 +673,7 @@ func _pegou(corpo: Node, m: Area2D) -> void:
 	moedas += 1
 	pontos += 10
 	_tocar("moeda")
-	_particulas(m.global_position, OURO, 12, 380.0, 0.5, 700.0, false)
+	_particulas(m.global_position, Paleta.OURO, 12, 380.0, 0.5, 700.0, false)
 	_texto_flutuante("+10", m.global_position)
 	m.queue_free()
 	_atualizar_hud()
@@ -837,7 +687,7 @@ func perder_vida(origem_x := NAN) -> void:
 	_tremer(0.7)
 	jogador.dano(origem_x)
 	_atualizar_hud()
-	_texto_flutuante("-1 coração", jogador.global_position + Vector2(0, -300), VERMELHO)
+	_texto_flutuante("-1 coração", jogador.global_position + Vector2(0, -300), Paleta.VERMELHO)
 	coracoes.pivot_offset = Vector2(60, 40)
 	coracoes.scale = Vector2(1.5, 1.5)
 	create_tween().tween_property(coracoes, "scale", Vector2.ONE, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
@@ -848,7 +698,7 @@ func perder_vida(origem_x := NAN) -> void:
 func _caiu(corpo: Node) -> void:
 	if corpo != jogador:
 		return
-	_particulas(Vector2(corpo.global_position.x, chao_y + 40), CLARO if cid["agua"] else Color(0.5, 0.4, 0.3), 14, 500.0, 0.6, 900.0)
+	_particulas(Vector2(corpo.global_position.x, chao_y + 40), Paleta.CLARO if cid["agua"] else Color(0.5, 0.4, 0.3), 14, 500.0, 0.6, 900.0)
 	if not queda_livre:
 		perder_vida()
 		aviso("Caiu! Você volta ao último checkpoint.", 2.5)
@@ -909,7 +759,7 @@ func _bater_bloco(b) -> void:
 			pontos += 100
 			_atualizar_hud()
 			_texto_flutuante("+100", b.global_position + Vector2(0, -80))
-			_particulas(b.global_position + Vector2(0, -50), OURO, 16, 420.0, 0.6))
+			_particulas(b.global_position + Vector2(0, -50), Paleta.OURO, 16, 420.0, 0.6))
 
 
 func _perguntar(q: Dictionary, bonus: bool, cb: Callable) -> void:
@@ -931,14 +781,14 @@ func _perguntar(q: Dictionary, bonus: bool, cb: Callable) -> void:
 	lbl_perg.text = q["pergunta"]
 	var cores := {"matematica": "#E07B1F", "portugues": "#C8344B", "ciencias": "#2E9E5B", "historia": "#9A6A3A", "geografia": "#1E8FA8", "tecnologia": "#2A74CC", "logica": "#7A4FBF", "biblia": "#C9A227"}
 	var cc := Color(cores.get(String(q["tema"]), "#1B5AA6"))
-	lbl_tema.add_theme_stylebox_override("normal", _estilo(cc, 22, Color(1, 1, 1, 0.55), 3, 14))
+	lbl_tema.add_theme_stylebox_override("normal", Estilos.caixa(cc, 22, Color(1, 1, 1, 0.55), 3, 14))
 	lbl_tema.add_theme_color_override("font_color", Color.WHITE)
 	for i in 4:
 		botoes[i].visible = i < perg_n
 		if i < perg_n:
 			botoes[i].text = "%d   %s" % [i + 1, q["alternativas"][i]]
 			botoes[i].disabled = false
-			botoes[i].add_theme_stylebox_override("disabled", _caixa_botao("azul"))
+			botoes[i].add_theme_stylebox_override("disabled", Estilos.caixa_botao("azul"))
 	lbl_feed.text = ""
 	lbl_feed.visible = false
 	_selecionar(0)
@@ -958,9 +808,9 @@ func _responder(i: int) -> void:
 	perg_ok = (i == certa)
 	for k in perg_n:
 		botoes[k].disabled = true
-	botoes[certa].add_theme_stylebox_override("disabled", _caixa_botao("azul", Color(0.55, 1.5, 0.65)))
+	botoes[certa].add_theme_stylebox_override("disabled", Estilos.caixa_botao("azul", Color(0.55, 1.5, 0.65)))
 	if not perg_ok and i >= 0:
-		botoes[i].add_theme_stylebox_override("disabled", _caixa_botao("azul", Color(1.7, 0.5, 0.5)))
+		botoes[i].add_theme_stylebox_override("disabled", Estilos.caixa_botao("azul", Color(1.7, 0.5, 0.5)))
 	barra.visible = false
 	var expl: String = perg_atual["explicacao"]
 	if perg_ok:
@@ -998,24 +848,24 @@ func _escolher_plat(p) -> void:
 		feitos += 1
 		acertos += 1
 		pontos += 200
-		p.cor = VERDE
+		p.cor = Paleta.VERDE
 		p.queue_redraw()
 		_tocar("acerto")
-		_particulas(p.global_position + Vector2(0, -20), VERDE, 16, 400.0, 0.6)
+		_particulas(p.global_position + Vector2(0, -20), Paleta.VERDE, 16, 400.0, 0.6)
 		_flash(Color(0.2, 0.9, 0.4, 0.25))
-		_texto_flutuante("Certo! +200", p.global_position + Vector2(-110, -170), VERDE)
+		_texto_flutuante("Certo! +200", p.global_position + Vector2(-110, -170), Paleta.VERDE)
 		_atualizar_hud()
 		aviso("Isso! " + str(pergunta_caminho["explicacao"]), 4.5)
 		_ponte_caminho()
 		banner.visible = false
 	else:
-		p.cor = VERMELHO
+		p.cor = Paleta.VERMELHO
 		p.queue_redraw()
 		_tocar("erro")
 		_tremer(0.6)
 		_flash(Color(1, 0.1, 0.15, 0.4))
-		_texto_flutuante("Ops! Não é essa", p.global_position + Vector2(-110, -170), VERMELHO)
-		_particulas(p.global_position + Vector2(0, -10), VERMELHO, 14, 380.0, 0.5)
+		_texto_flutuante("Ops! Não é essa", p.global_position + Vector2(-110, -170), Paleta.VERMELHO)
+		_particulas(p.global_position + Vector2(0, -10), Paleta.VERMELHO, 14, 380.0, 0.5)
 		var x0: float = p.position.x
 		var sac := create_tween()
 		for k in 6:
@@ -1095,13 +945,7 @@ func _fim_de_jogo() -> void:
 	estado = "fim"
 	venceu = false
 	jogador.travado = true
-	fim_titulo.text = "Fim de jogo"
-	fim_estrelas.visible = false
-	fim_ctl.visible = false
-	fim_texto.text = "Você chegou até aqui com %d pontos. Quem tenta de novo aprende mais!" % pontos
-	fim_dica.text = ""
-	tela_fim.find_child("dica_teclas", true, false).text = Jogo.dica("Enter: tentar de novo     M: mapa", "A: tentar de novo     Y: mapa", "Cruz: tentar de novo     Triângulo: mapa")
-	tela_fim.visible = true
+	tela_fim.mostrar_derrota(pontos)
 	tela_perg.visible = false
 	get_tree().paused = false
 
@@ -1119,24 +963,16 @@ func _terminar() -> void:
 	if acertos >= n_obrig and moedas >= int(moedas_total * 0.8):
 		est = 3
 	Jogo.registrar(idx, est, pontos)
-	fim_titulo.text = "%s concluída!" % cid["nome"]
-	fim_ctl.visible = true
-	fim_ctl.n = est
-	fim_texto.text = "%d de %d desafios certos   ·   %d de %d moedas\n%d corações   ·   %d pontos" % [acertos, n_obrig, moedas, moedas_total, vidas, pontos]
-	fim_dica.text = "Você sabia? " + str(cid["dica"])
-	tela_fim.find_child("dica_teclas", true, false).text = (Jogo.dica("Enter: próxima fase     M: mapa", "A: próxima fase     Y: mapa", "Cruz: próxima fase     Triângulo: mapa") if idx < 4 else Jogo.dica("Enter: ver meu prêmio     M: mapa", "A: ver meu prêmio     Y: mapa", "Cruz: ver meu prêmio     Triângulo: mapa"))
+	var teclas := Jogo.dica("Enter: próxima fase     M: mapa", "A: próxima fase     Y: mapa", "Cruz: próxima fase     Triângulo: mapa") if idx < 4 else Jogo.dica("Enter: ver meu prêmio     M: mapa", "A: ver meu prêmio     Y: mapa", "Cruz: ver meu prêmio     Triângulo: mapa")
+	var resumo := "%d de %d desafios certos   ·   %d de %d moedas\n%d corações   ·   %d pontos" % [acertos, n_obrig, moedas, moedas_total, vidas, pontos]
+	tela_fim.mostrar_vitoria("%s concluída!" % cid["nome"], est, resumo, "Você sabia? " + str(cid["dica"]), teclas)
 	_atualizar_hud()
-	get_tree().create_timer(0.9).timeout.connect(func():
-		tela_fim.visible = true
-		fim_ctl.animar()
-		tela_fim.modulate.a = 0.0
-		create_tween().tween_property(tela_fim, "modulate:a", 1.0, 0.4))
 	for i in 3:
 		get_tree().create_timer(0.15 + i * 0.55).timeout.connect(func():
 			if is_instance_valid(jogador):
 				jogador.velocity.y = -800.0
 				jogador.travado = true)
-	_particulas(jogador.global_position + Vector2(0, -200), OURO, 40, 700.0, 1.2, 500.0)
+	_particulas(jogador.global_position + Vector2(0, -200), Paleta.OURO, 40, 700.0, 1.2, 500.0)
 
 
 func _ir_mapa() -> void:
@@ -1145,7 +981,6 @@ func _ir_mapa() -> void:
 
 
 var perg_sel := 0
-var fim_ctl: Estrelas
 
 
 ## destaca a alternativa escolhida com as setas (fica dourada)
@@ -1153,7 +988,7 @@ func _selecionar(i: int) -> void:
 	perg_sel = i
 	for k in 4:
 		var b: Button = botoes[k]
-		b.add_theme_stylebox_override("normal", _caixa_botao("dourado") if k == i else _caixa_botao("azul"))
+		b.add_theme_stylebox_override("normal", Estilos.caixa_botao("dourado") if k == i else Estilos.caixa_botao("azul"))
 		b.add_theme_color_override("font_color", Color("#14213D") if k == i else Color.WHITE)
 
 
@@ -1266,7 +1101,7 @@ func _process(delta: float) -> void:
 	if estado == "pergunta":
 		tempo -= delta
 		barra.value = tempo
-		fill_tempo.bg_color = VERDE if tempo > 10.0 else (OURO if tempo > 5.0 else VERMELHO)
+		fill_tempo.bg_color = Paleta.VERDE if tempo > 10.0 else (Paleta.OURO if tempo > 5.0 else Paleta.VERMELHO)
 		if tempo <= 0.0:
 			_responder(-1)
 	var x: float = jogador.global_position.x
