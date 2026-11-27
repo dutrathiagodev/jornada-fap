@@ -152,7 +152,20 @@ func _ready() -> void:
 	info = _rot(ui, "", 34, Vector2(0, 890), Color.WHITE)
 	_rot(ui, Jogo.dica("← →  escolher     Enter  jogar     Esc  voltar" if not ControlesToque.deve_aparecer() else "Toque na cidade para escolher e toque de novo para jogar", "Direcional  escolher     A  jogar     B  voltar", "Direcional  escolher     Cruz  jogar     Bolinha  voltar"), 30, Vector2(0, 1000), Color(1, 1, 1, 0.85))
 	if Jogo.terminou_tudo():
-		_rot(ui, "P  ver meu prêmio", 36, Vector2(0, 945), OURO)
+		if ControlesToque.deve_aparecer():
+			var premio := Estilos.botao("Ver meu prêmio", 34)
+			premio.position = Vector2(1400, 130)
+			premio.size = Vector2(460, 90)
+			premio.pressed.connect(func(): get_tree().change_scene_to_file("res://final.tscn"))
+			ui.add_child(premio)
+		else:
+			_rot(ui, "P  ver meu prêmio", 36, Vector2(0, 945), OURO)
+	if ControlesToque.deve_aparecer():
+		var sair := Estilos.botao("Voltar", 34)
+		sair.position = Vector2(60, 150)
+		sair.size = Vector2(240, 80)
+		sair.pressed.connect(func(): get_tree().change_scene_to_file("res://main.tscn"))
+		ui.add_child(sair)
 	_atualizar()
 
 

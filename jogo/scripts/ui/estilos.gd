@@ -60,3 +60,16 @@ static func caixa_botao(tipo: String, tom := Color.WHITE) -> StyleBoxTexture:
 	sb.content_margin_bottom = 10
 	sb.modulate_color = tom
 	return sb
+
+
+## botão de arte (dourado) para telas de toque
+static func botao(texto: String, tam := 40) -> Button:
+	var b := Button.new()
+	b.text = texto
+	b.add_theme_font_size_override("font_size", tam)
+	for cor in ["font_color", "font_hover_color", "font_pressed_color"]:
+		b.add_theme_color_override(cor, Paleta.NOITE)
+	for estado in ["normal", "hover", "pressed"]:
+		b.add_theme_stylebox_override(estado, caixa_botao("dourado"))
+	b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	return b
