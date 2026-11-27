@@ -27,6 +27,7 @@
 }
 
 html {
+  overflow-x: clip;
   scroll-behavior: smooth;
   scroll-snap-type: y proximity;
   background: var(--noite);
@@ -37,7 +38,7 @@ body {
   color: var(--texto);
   background: var(--noite);
   line-height: 1.65;
-  overflow-x: hidden;
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
 
