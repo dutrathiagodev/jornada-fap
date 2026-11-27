@@ -380,10 +380,16 @@ func _criar_ui() -> void:
 		ui.add_child(toque)
 	tela_perg = TelaPergunta.new(cid["id"], TEMPO_PERGUNTA)
 	tela_perg.escolheu.connect(_responder)
+	tela_perg.continuou.connect(_continuar_se_feedback)
 	ui.add_child(tela_perg)
 	tela_fim = TelaFim.new()
+	tela_fim.avancou.connect(_avancar_fim)
+	tela_fim.foi_ao_mapa.connect(_ir_mapa)
 	ui.add_child(tela_fim)
 	tela_pausa = TelaPausa.new()
+	tela_pausa.retomou.connect(_retomar)
+	tela_pausa.reiniciou.connect(_reiniciar)
+	tela_pausa.foi_ao_mapa.connect(_ir_mapa)
 	ui.add_child(tela_pausa)
 	# HUD por último: fica por cima do escurecimento das telas (não "apaga" os pontos)
 	hud = Hud.new("Fase %d · %s" % [idx + 1, cid["nome"]], fim_x, layout)
@@ -732,7 +738,8 @@ func _terminar() -> void:
 	Jogo.registrar(idx, est, pontos)
 	var teclas := Jogo.dica("Enter: próxima fase     M: mapa", "A: próxima fase     Y: mapa", "Cruz: próxima fase     Triângulo: mapa") if idx < 4 else Jogo.dica("Enter: ver meu prêmio     M: mapa", "A: ver meu prêmio     Y: mapa", "Cruz: ver meu prêmio     Triângulo: mapa")
 	var resumo := "%d de %d desafios certos   ·   %d de %d moedas\n%d corações   ·   %d pontos" % [acertos, n_obrig, moedas, moedas_total, vidas, pontos]
-	tela_fim.mostrar_vitoria("%s concluída!" % cid["nome"], est, resumo, "Você sabia? " + str(cid["dica"]), teclas)
+	var acao := "Próxima fase" if idx < 4 else "Ver meu prêmio"
+	tela_fim.mostrar_vitoria("%s concluída!" % cid["nome"], est, resumo, "Você sabia? " + str(cid["dica"]), teclas, acao)
 	_atualizar_hud()
 	for i in 3:
 		get_tree().create_timer(0.15 + i * 0.55).timeout.connect(func():
@@ -742,16 +749,33 @@ func _terminar() -> void:
 	_particulas(jogador.global_position + Vector2(0, -200), Paleta.OURO, 40, 700.0, 1.2, 500.0)
 
 
+## depois do fim da fase: vitória segue (próxima cidade ou prêmio); derrota tenta de novo
+func _avancar_fim() -> void:
+	get_tree().paused = false
+	if not venceu:
+		get_tree().reload_current_scene()
+	elif idx < 4:
+		Jogo.cidade_atual = idx + 1
+		get_tree().change_scene_to_file("res://mapa.tscn")
+	else:
+		get_tree().change_scene_to_file("res://final.tscn")
+
+
+func _reiniciar() -> void:
+	get_tree().paused = false
+	get_tree().reload_current_scene()
+
+
+func _continuar_se_feedback() -> void:
+	if estado == "feedback":
+		_continuar()
+
+
 func _ir_mapa() -> void:
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://mapa.tscn")
 
 
-
-
-## toque na tela do celular (o Godot o converte em clique do mouse) ou clique do mouse
-func _tocou_na_tela(ev: InputEvent) -> bool:
-	return ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT
 
 
 func _pausar() -> void:
@@ -784,30 +808,21 @@ func _unhandled_input(ev: InputEvent) -> void:
 	elif estado == "pergunta" and ev.is_action_pressed("confirmar"):
 		_responder(tela_perg.selecionada)
 		get_viewport().set_input_as_handled()
-	elif estado == "feedback" and (ev.is_action_pressed("confirmar") or _tocou_na_tela(ev)):
+	elif estado == "feedback" and ev.is_action_pressed("confirmar"):
 		_continuar()
 		get_viewport().set_input_as_handled()
 	elif estado == "fim" and tela_fim.visible:
-		if ev.is_action_pressed("confirmar") or _tocou_na_tela(ev):
-			get_tree().paused = false
-			if venceu:
-				if idx < 4:
-					Jogo.cidade_atual = idx + 1
-					get_tree().change_scene_to_file("res://mapa.tscn")
-				else:
-					get_tree().change_scene_to_file("res://final.tscn")
-			else:
-				get_tree().reload_current_scene()
+		if ev.is_action_pressed("confirmar"):
+			_avancar_fim()
 		elif ev.is_action_pressed("mapa") or ev.is_action_pressed("voltar"):
 			_ir_mapa()
 	elif estado == "jogo" and ev.is_action_pressed("pausar"):
 		_pausar()
 	elif estado == "pausa":
-		if ev.is_action_pressed("pausar") or ev.is_action_pressed("confirmar") or _tocou_na_tela(ev):
+		if ev.is_action_pressed("pausar") or ev.is_action_pressed("confirmar"):
 			_retomar()
 		elif ev.is_action_pressed("reiniciar"):
-			get_tree().paused = false
-			get_tree().reload_current_scene()
+			_reiniciar()
 		elif ev.is_action_pressed("mapa"):
 			_ir_mapa()
 
