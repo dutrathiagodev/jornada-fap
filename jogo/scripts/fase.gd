@@ -62,35 +62,16 @@ var perg_ok := false
 var perg_bonus := false
 var perg_n := 4
 var tempo := TEMPO_PERGUNTA
-var aviso_id := 0
 var demo_t := 0.0
 var demo_tp := false
 var demo_pulou: Array = []
 
 # widgets
-var coracoes
-var lbl_moedas: Label
-var lbl_pontos: Label
-var lbl_fase: Label
-var tela_perg: TelaCheia
-var painel_perg: PanelContainer
-var estilo_botao := {}
-var fundo_perg: TextureRect
-var lbl_tema: Label
-var lbl_perg: Label
-var botoes: Array = []
-var barra: ProgressBar
-var fill_tempo: StyleBoxFlat
-var hud_prog
-var lbl_feed: Label
-var lbl_cont: Label
-var aviso_painel: PanelContainer
-var aviso_lbl: Label
-var banner: PanelContainer
-var banner_lbl: Label
+var hud: Hud
+var avisos: Avisos
+var tela_perg: TelaPergunta
 var tela_fim: TelaFim
 var tela_pausa: TelaPausa
-var flash: ColorRect
 var toque: ControlesToque       # botões na tela (só em aparelhos de toque)
 
 
@@ -391,218 +372,32 @@ func _criar_ui() -> void:
 	ui = CanvasLayer.new()
 	ui.layer = 10
 	add_child(ui)
-
-	flash = ColorRect.new()
-	flash.set_anchors_preset(Control.PRESET_FULL_RECT)
-	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	flash.color = Color(1, 0.1, 0.15, 0.0)
-	ui.add_child(flash)
-
-	coracoes = Coracoes.new()
-	coracoes.position = Vector2(30, 24)
-	coracoes.custom_minimum_size = Vector2(260, 80)
-	ui.add_child(coracoes)
-	var ico := TextureRect.new()
-	ico.texture = load("res://assets/objetos/moeda_logo.png")
-	ico.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	ico.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
-	ico.position = Vector2(36, 108)
-	ico.size = Vector2(52, 52)
-	ui.add_child(ico)
-	lbl_moedas = Estilos.rotulo("× 0", 44, Paleta.OURO)
-	lbl_moedas.position = Vector2(98, 100)
-	ui.add_child(lbl_moedas)
-	var cartao := Panel.new()
-	cartao.position = Vector2(1920 - 400, 18)
-	cartao.size = Vector2(370, 128)
-	cartao.add_theme_stylebox_override("panel", Estilos.caixa_botao("azul"))
-	ui.add_child(cartao)
-	lbl_pontos = Estilos.rotulo("0", 64, Paleta.OURO)
-	lbl_pontos.position = Vector2(20, 2)
-	lbl_pontos.size = Vector2(215, 76)
-	lbl_pontos.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	lbl_pontos.add_theme_constant_override("outline_size", 8)
-	cartao.add_child(lbl_pontos)
-	var pts := Estilos.rotulo("PONTOS", 22, Color("#BFE8FF"), false)
-	pts.position = Vector2(244, 38)
-	cartao.add_child(pts)
-	lbl_fase = Estilos.rotulo("Fase %d · %s" % [idx + 1, cid["nome"]], 26, Color.WHITE)
-	lbl_fase.position = Vector2(30, 78)
-	lbl_fase.size = Vector2(310, 36)
-	lbl_fase.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lbl_fase.add_theme_constant_override("outline_size", 8)
-	cartao.add_child(lbl_fase)
-
-	hud_prog = BarraProgresso.new()
-	hud_prog.position = Vector2(540, 20)
-	hud_prog.size = Vector2(840, 100)
-	hud_prog.fim_x = fim_x
-	for e in layout:
-		if e[0] == "porta":
-			hud_prog.marcas.append(e[1])
-		elif e[0] == "caminho":
-			hud_prog.marcas.append((e[1] + e[2]) / 2.0)
-		elif e[0] == "ponte_final":
-			hud_prog.marcas.append((e[1] + e[2]) / 2.0)
-		elif e[0] == "checkpoint":
-			hud_prog.checks.append(e[1])
-	ui.add_child(hud_prog)
-
-	aviso_painel = PanelContainer.new()
-	aviso_painel.position = Vector2(360, 118)
-	aviso_painel.custom_minimum_size = Vector2(1200, 0)
-	aviso_painel.visible = false
-	aviso_lbl = Estilos.rotulo("", 32, Color.WHITE, false)
-	aviso_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	aviso_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	aviso_painel.add_child(aviso_lbl)
-	ui.add_child(aviso_painel)
-
-	banner = PanelContainer.new()
-	banner.add_theme_stylebox_override("panel", Estilos.caixa(Color(1, 0.83, 0.3, 0.96), 22, Paleta.NOITE, 5, 18))
-	banner.position = Vector2(360, 118)
-	banner.custom_minimum_size = Vector2(1200, 0)
-	banner.visible = false
-	banner_lbl = Estilos.rotulo("", 36, Paleta.NOITE, false)
-	banner_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	banner_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	banner.add_child(banner_lbl)
-	ui.add_child(banner)
-
+	avisos = Avisos.new()
+	ui.add_child(avisos)
 	if ControlesToque.deve_aparecer():
 		toque = ControlesToque.new()
 		toque.pausar_pedido.connect(_pausar)
 		ui.add_child(toque)
-
-	_criar_tela_pergunta()
+	tela_perg = TelaPergunta.new(cid["id"], TEMPO_PERGUNTA)
+	tela_perg.escolheu.connect(_responder)
+	ui.add_child(tela_perg)
 	tela_fim = TelaFim.new()
 	ui.add_child(tela_fim)
 	tela_pausa = TelaPausa.new()
 	ui.add_child(tela_pausa)
-	# HUD fica por cima do escurecimento das telas (não "apaga" os pontos)
-	for n in [coracoes, ico, lbl_moedas, cartao, hud_prog]:
-		if n.get_parent() == ui:
-			ui.move_child(n, -1)
+	# HUD por último: fica por cima do escurecimento das telas (não "apaga" os pontos)
+	hud = Hud.new("Fase %d · %s" % [idx + 1, cid["nome"]], fim_x, layout)
+	ui.add_child(hud)
 	if OS.has_environment("FAP_PAUSA"):  # só para testes: abre a pausa sozinho
 		get_tree().create_timer(1.0).timeout.connect(_pausar)
 
 
-func _criar_tela_pergunta() -> void:
-	tela_perg = TelaCheia.new(0.45)
-	ui.add_child(tela_perg)
-	fundo_perg = TextureRect.new()
-	fundo_perg.texture = load("res://assets/%s/2_meio.png" % cid["id"])
-	fundo_perg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	fundo_perg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	fundo_perg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	fundo_perg.modulate = Color(1, 1, 1, 0.55)
-	fundo_perg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	tela_perg.add_child(fundo_perg)
-	tela_perg.move_child(fundo_perg, 0)
-	var painel := PanelContainer.new()
-	painel_perg = painel
-	var sp := StyleBoxTexture.new()
-	sp.texture = load("res://assets/ui/painel.png")
-	sp.texture_margin_left = 62
-	sp.texture_margin_right = 62
-	sp.texture_margin_top = 58
-	sp.texture_margin_bottom = 58
-	sp.set_content_margin_all(60)
-	painel.add_theme_stylebox_override("panel", sp)
-	painel.custom_minimum_size = Vector2(1400, 0)
-	tela_perg.centro.add_child(painel)
-	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 16)
-	painel.add_child(v)
-	var cab := HBoxContainer.new()
-	cab.add_theme_constant_override("separation", 20)
-	v.add_child(cab)
-	lbl_tema = Estilos.rotulo("", 28, Paleta.CLARO, false)
-	lbl_tema.add_theme_stylebox_override("normal", Estilos.caixa(Color(0.1, 0.35, 0.65), 22, Color(1, 1, 1, 0.5), 3, 14))
-	lbl_tema.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	lbl_tema.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	cab.add_child(lbl_tema)
-	var esp := Control.new()
-	esp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	cab.add_child(esp)
-	var marca := TextureRect.new()
-	marca.texture = load("res://assets/logos/adventista_branco.png")
-	marca.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	marca.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	marca.custom_minimum_size = Vector2(64, 58)
-	marca.modulate = Color(1, 1, 1, 0.9)
-	cab.add_child(marca)
-	var placa := PanelContainer.new()
-	var sbp := StyleBoxFlat.new()
-	sbp.bg_color = Color(0.02, 0.08, 0.22, 0.6)
-	sbp.set_corner_radius_all(24)
-	sbp.border_color = Color(1.0, 0.83, 0.3, 0.55)
-	sbp.set_border_width_all(3)
-	sbp.content_margin_left = 36
-	sbp.content_margin_right = 36
-	sbp.content_margin_top = 22
-	sbp.content_margin_bottom = 26
-	placa.add_theme_stylebox_override("panel", sbp)
-	v.add_child(placa)
-	lbl_perg = Estilos.rotulo("", 58, Color.WHITE, false)
-	lbl_perg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	lbl_perg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	placa.add_child(lbl_perg)
-	for i in 4:
-		var b := Button.new()
-		b.custom_minimum_size = Vector2(0, 88)
-		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		b.add_theme_font_size_override("font_size", 38)
-		b.add_theme_color_override("font_color", Color.WHITE)
-		b.add_theme_color_override("font_hover_color", Color.WHITE)
-		b.add_theme_color_override("font_disabled_color", Color.WHITE)
-		b.add_theme_stylebox_override("normal", Estilos.caixa_botao("azul"))
-		b.add_theme_stylebox_override("hover", Estilos.caixa_botao("dourado"))
-		b.add_theme_stylebox_override("pressed", Estilos.caixa_botao("dourado"))
-		b.add_theme_stylebox_override("disabled", Estilos.caixa_botao("azul"))
-		b.add_theme_color_override("font_hover_color", Color("#14213D"))
-		b.add_theme_color_override("font_pressed_color", Color("#14213D"))
-		b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
-		b.pressed.connect(_responder.bind(i))
-		v.add_child(b)
-		botoes.append(b)
-	barra = ProgressBar.new()
-	barra.custom_minimum_size = Vector2(0, 22)
-	barra.show_percentage = false
-	barra.max_value = TEMPO_PERGUNTA
-	barra.add_theme_stylebox_override("background", Estilos.caixa(Color(0, 0, 0, 0.35), 11, Color(1, 1, 1, 0.25), 2))
-	fill_tempo = Estilos.caixa(Paleta.VERDE, 11)
-	barra.add_theme_stylebox_override("fill", fill_tempo)
-	v.add_child(barra)
-	var dica_perg := Estilos.rotulo(Jogo.dica("↑ ↓ escolher     Enter confirmar     (ou tecla 1 a 4)", "Direcional: escolher     A: confirmar", "Direcional: escolher     Cruz: confirmar"), 24, Color(1, 1, 1, 0.7), false)
-	dica_perg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(dica_perg)
-	lbl_feed = Estilos.rotulo("", 32, Color.WHITE, false)
-	lbl_feed.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	v.add_child(lbl_feed)
-	lbl_cont = Estilos.rotulo(Jogo.dica("Aperte ENTER para continuar (ou toque na tela)", "Aperte A para continuar", "Aperte Cruz para continuar"), 28, Paleta.OURO, false)
-	lbl_cont.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	v.add_child(lbl_cont)
-
-
 func _atualizar_hud() -> void:
-	coracoes.cheios = vidas
-	coracoes.queue_redraw()
-	lbl_moedas.text = "× %d" % moedas
-	lbl_pontos.text = "%d" % pontos
+	hud.atualizar(vidas, moedas, pontos)
 
 
 func aviso(texto: String, dur := 3.0, erro := false) -> void:
-	aviso_id += 1
-	var meu := aviso_id
-	aviso_painel.add_theme_stylebox_override("panel", Estilos.caixa(Color(0.55, 0.08, 0.12, 0.96) if erro else Color(0.04, 0.23, 0.43, 0.93), 22, Color.WHITE if erro else Paleta.CLARO, 4, 20))
-	aviso_lbl.text = texto
-	aviso_painel.visible = true
-	aviso_painel.modulate.a = 0.0
-	create_tween().tween_property(aviso_painel, "modulate:a", 1.0, 0.18)
-	get_tree().create_timer(dur).timeout.connect(func():
-		if meu == aviso_id:
-			aviso_painel.visible = false)
+	avisos.mostrar(texto, dur, erro)
 
 
 # ====================================================================== sons e efeitos
@@ -621,8 +416,7 @@ func _tocar(nome: String) -> void:
 
 
 func _flash(cor: Color) -> void:
-	flash.color = cor
-	create_tween().tween_property(flash, "color:a", 0.0, 0.55)
+	avisos.clarao(cor)
 
 
 func _tremer(f: float) -> void:
@@ -688,9 +482,7 @@ func perder_vida(origem_x := NAN) -> void:
 	jogador.dano(origem_x)
 	_atualizar_hud()
 	_texto_flutuante("-1 coração", jogador.global_position + Vector2(0, -300), Paleta.VERMELHO)
-	coracoes.pivot_offset = Vector2(60, 40)
-	coracoes.scale = Vector2(1.5, 1.5)
-	create_tween().tween_property(coracoes, "scale", Vector2.ONE, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	hud.pulsar_coracoes()
 	if vidas <= 0:
 		_fim_de_jogo()
 
@@ -777,27 +569,9 @@ func _perguntar(q: Dictionary, bonus: bool, cb: Callable) -> void:
 		tema = "BLOCO BÔNUS  ·  " + tema + "  (sem perder coração)"
 	else:
 		tema = "DESAFIO %d DE %d  ·  %s" % [mini(feitos + 1, n_obrig), n_obrig, tema]
-	lbl_tema.text = tema + ("   ·   " + str(q["referencia"]) if q.has("referencia") else "")
-	lbl_perg.text = q["pergunta"]
-	var cores := {"matematica": "#E07B1F", "portugues": "#C8344B", "ciencias": "#2E9E5B", "historia": "#9A6A3A", "geografia": "#1E8FA8", "tecnologia": "#2A74CC", "logica": "#7A4FBF", "biblia": "#C9A227"}
-	var cc := Color(cores.get(String(q["tema"]), "#1B5AA6"))
-	lbl_tema.add_theme_stylebox_override("normal", Estilos.caixa(cc, 22, Color(1, 1, 1, 0.55), 3, 14))
-	lbl_tema.add_theme_color_override("font_color", Color.WHITE)
-	for i in 4:
-		botoes[i].visible = i < perg_n
-		if i < perg_n:
-			botoes[i].text = "%d   %s" % [i + 1, q["alternativas"][i]]
-			botoes[i].disabled = false
-			botoes[i].add_theme_stylebox_override("disabled", Estilos.caixa_botao("azul"))
-	lbl_feed.text = ""
-	lbl_feed.visible = false
-	_selecionar(0)
-	lbl_cont.visible = false
-	barra.visible = true
-	barra.value = TEMPO_PERGUNTA
-	tela_perg.visible = true
-	tela_perg.modulate.a = 0.0
-	create_tween().tween_property(tela_perg, "modulate:a", 1.0, 0.2)
+	var rotulo_tema := tema + ("   ·   " + str(q["referencia"]) if q.has("referencia") else "")
+	tela_perg.mostrar_pergunta(rotulo_tema, String(q["tema"]), q["pergunta"], q["alternativas"])
+	tela_perg.atualizar_tempo(TEMPO_PERGUNTA)
 
 
 func _responder(i: int) -> void:
@@ -806,25 +580,18 @@ func _responder(i: int) -> void:
 	estado = "feedback"
 	var certa := int(perg_atual["correta"])
 	perg_ok = (i == certa)
-	for k in perg_n:
-		botoes[k].disabled = true
-	botoes[certa].add_theme_stylebox_override("disabled", Estilos.caixa_botao("azul", Color(0.55, 1.5, 0.65)))
-	if not perg_ok and i >= 0:
-		botoes[i].add_theme_stylebox_override("disabled", Estilos.caixa_botao("azul", Color(1.7, 0.5, 0.5)))
-	barra.visible = false
 	var expl: String = perg_atual["explicacao"]
+	var mensagem := "Isso mesmo! " + expl
+	if not perg_ok:
+		mensagem = ("Tempo esgotado! " if i < 0 else "Quase! ") + "A resposta certa é \"%s\". %s" % [perg_atual["alternativas"][certa], expl]
+	tela_perg.mostrar_resposta(i, certa, mensagem)
 	if perg_ok:
-		lbl_feed.visible = true
-		lbl_feed.text = "Isso mesmo! " + expl
 		_tocar("acerto")
 	else:
-		lbl_feed.visible = true
-		lbl_feed.text = ("Tempo esgotado! " if i < 0 else "Quase! ") + "A resposta certa é \"%s\". %s" % [perg_atual["alternativas"][certa], expl]
 		_tocar("erro")
 		_flash(Color(1, 0.1, 0.15, 0.35))
 		if not perg_bonus:
 			perder_vida()
-	lbl_cont.visible = true
 
 
 func _continuar() -> void:
@@ -857,7 +624,7 @@ func _escolher_plat(p) -> void:
 		_atualizar_hud()
 		aviso("Isso! " + str(pergunta_caminho["explicacao"]), 4.5)
 		_ponte_caminho()
-		banner.visible = false
+		avisos.faixa("")
 	else:
 		p.cor = Paleta.VERMELHO
 		p.queue_redraw()
@@ -980,16 +747,6 @@ func _ir_mapa() -> void:
 	get_tree().change_scene_to_file("res://mapa.tscn")
 
 
-var perg_sel := 0
-
-
-## destaca a alternativa escolhida com as setas (fica dourada)
-func _selecionar(i: int) -> void:
-	perg_sel = i
-	for k in 4:
-		var b: Button = botoes[k]
-		b.add_theme_stylebox_override("normal", Estilos.caixa_botao("dourado") if k == i else Estilos.caixa_botao("azul"))
-		b.add_theme_color_override("font_color", Color("#14213D") if k == i else Color.WHITE)
 
 
 ## toque na tela do celular (o Godot o converte em clique do mouse) ou clique do mouse
@@ -1019,13 +776,13 @@ func _unhandled_input(ev: InputEvent) -> void:
 		_responder(tecla - KEY_1)
 		get_viewport().set_input_as_handled()
 	elif estado == "pergunta" and ev.is_action_pressed("nav_anterior"):
-		_selecionar(posmod(perg_sel - 1, perg_n))
+		tela_perg.mover(-1)
 		get_viewport().set_input_as_handled()
 	elif estado == "pergunta" and ev.is_action_pressed("nav_proximo"):
-		_selecionar(posmod(perg_sel + 1, perg_n))
+		tela_perg.mover(1)
 		get_viewport().set_input_as_handled()
 	elif estado == "pergunta" and ev.is_action_pressed("confirmar"):
-		_responder(perg_sel)
+		_responder(tela_perg.selecionada)
 		get_viewport().set_input_as_handled()
 	elif estado == "feedback" and (ev.is_action_pressed("confirmar") or _tocou_na_tela(ev)):
 		_continuar()
@@ -1100,19 +857,13 @@ func _process(delta: float) -> void:
 		toque.visible = estado == "jogo"
 	if estado == "pergunta":
 		tempo -= delta
-		barra.value = tempo
-		fill_tempo.bg_color = Paleta.VERDE if tempo > 10.0 else (Paleta.OURO if tempo > 5.0 else Paleta.VERMELHO)
+		tela_perg.atualizar_tempo(tempo)
 		if tempo <= 0.0:
 			_responder(-1)
 	var x: float = jogador.global_position.x
 	var na_zona := tem_caminho and x > caminho_x1 - 650.0 and x < caminho_x2 and not caminho_resolvido and estado == "jogo"
-	banner.visible = na_zona
-	if na_zona:
-		banner_lbl.text = "%s   →   pule na certa e fique nela!" % pergunta_caminho["pergunta"]
-	hud_prog.x_jog = x
-	hud_prog.feitos = feitos
-	hud_prog.total = n_obrig
-	hud_prog.queue_redraw()
+	avisos.faixa("%s   →   pule na certa e fique nela!" % pergunta_caminho["pergunta"] if na_zona else "")
+	hud.atualizar_progresso(x, feitos, n_obrig)
 	olhar = lerpf(olhar, float(jogador.olhando) * 140.0, 1.0 - exp(-3.0 * delta))
 	tremor = maxf(0.0, tremor - delta * 2.2)
 	camera.offset = Vector2(olhar, 0) + Vector2(randf_range(-1, 1), randf_range(-1, 1)) * tremor * 22.0
