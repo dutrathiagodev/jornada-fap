@@ -3,6 +3,7 @@ extends TelaCheia
 ## Tela de pergunta: tema, enunciado, até 4 alternativas, barra de tempo e feedback.
 
 signal escolheu(indice: int)
+signal continuou
 
 const CORES_TEMA := {"matematica": "#E07B1F", "portugues": "#C8344B", "ciencias": "#2E9E5B", "historia": "#9A6A3A", "geografia": "#1E8FA8", "tecnologia": "#2A74CC", "logica": "#7A4FBF", "biblia": "#C9A227"}
 const MAX_ALTERNATIVAS := 4
@@ -15,7 +16,7 @@ var _botoes: Array[Button] = []
 var _barra: ProgressBar
 var _cor_barra: StyleBoxFlat
 var _feedback: Label
-var _continuar: Label
+var _continuar: Control
 
 
 func _init(cidade_id: String, tempo_max: float) -> void:
@@ -155,12 +156,22 @@ func _criar_barra(coluna: VBoxContainer, tempo_max: float) -> void:
 
 
 func _criar_rodape(coluna: VBoxContainer) -> void:
-	var dica := Estilos.rotulo(Jogo.dica("↑ ↓ escolher     Enter confirmar     (ou tecla 1 a 4)", "Direcional: escolher     A: confirmar", "Direcional: escolher     Cruz: confirmar"), 24, Color(1, 1, 1, 0.7), false)
-	dica.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	coluna.add_child(dica)
+	var toque := ControlesToque.deve_aparecer()
+	if not toque:
+		var dica := Estilos.rotulo(Jogo.dica("↑ ↓ escolher     Enter confirmar     (ou tecla 1 a 4)", "Direcional: escolher     A: confirmar", "Direcional: escolher     Cruz: confirmar"), 24, Color(1, 1, 1, 0.7), false)
+		dica.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		coluna.add_child(dica)
 	_feedback = Estilos.rotulo("", 32, Color.WHITE, false)
 	_feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	coluna.add_child(_feedback)
-	_continuar = Estilos.rotulo(Jogo.dica("Aperte ENTER para continuar (ou toque na tela)", "Aperte A para continuar", "Aperte Cruz para continuar"), 28, Paleta.OURO, false)
-	_continuar.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	if toque:
+		var botao := Estilos.botao("Continuar", 40)
+		botao.custom_minimum_size = Vector2(420, 90)
+		botao.size_flags_horizontal = Control.SIZE_SHRINK_END
+		botao.pressed.connect(func(): continuou.emit())
+		_continuar = botao
+	else:
+		var aviso := Estilos.rotulo(Jogo.dica("Aperte ENTER para continuar", "Aperte A para continuar", "Aperte Cruz para continuar"), 28, Paleta.OURO, false)
+		aviso.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		_continuar = aviso
 	coluna.add_child(_continuar)
