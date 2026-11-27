@@ -97,7 +97,10 @@ A janela de pergunta é simples. Fazer à mão com nós `Control` é mais fácil
 
 ## 8.8 Como o jogo está montado hoje (27/11/2026)
 - Cenas: `main.tscn` (título), `mapa.tscn`, `fase.tscn`, `final.tscn`. Cada uma só chama um script; a tela é montada **por código** (`titulo.gd`, `mapa.gd`, `fase.gd`, `final.gd`).
-- `fase.gd` contém a fase inteira e as classes internas: `Moeda`, `Porta`, `Bloco`, `Inimigo`, `Tronco`, `Abismo`, `Plat`, `Bandeira`, `Progresso`, `Coracoes`.
+- `fase.gd` só orquestra a fase (regras, física, perguntas). Cada peça mora no seu arquivo, uma classe por arquivo (`class_name`):
+  - `scripts/entidades/`: `Moeda`, `Porta`, `Bloco`, `Inimigo`, `Tronco`, `Abismo`, `Bandeira`, `PlataformaResposta`.
+  - `scripts/ui/` (interface): `Paleta` (cores), `Estilos` (caixas e rótulos), `TelaCheia` (base das telas), `TelaPergunta`, `TelaPausa`, `TelaFim`, `Hud` (corações, moedas, pontos, barra), `Avisos` (clarão, aviso, faixa do caminho), `BarraProgresso`, `Coracoes`, `Estrelas`, `ControlesToque`.
+  - Regra: a tela só desenha e emite sinais (`TelaPergunta.escolheu`); quem decide é o `fase.gd`.
 - `estrelas.gd` (`class_name Estrelas`) desenha as estrelas do mapa, do resultado e do cupom.
 - Autoloads: `Jogo` (cidades, layout de cada fase, progresso salvo em `user://progresso.cfg`, cupom, fonte Lilita One) e `Perguntas` (banco de perguntas e mapa de teclas).
 - Resolução 1920×1080, renderizador Compatibility. A pausa e as perguntas pausam só o mundo; a interface continua ativa e o HUD fica por cima do escurecimento.
